@@ -1,6 +1,7 @@
 use std::str::FromStr;
 use crate::cursor::{FromTokens, Cursor, Tokens};
 use crate::tokens::TokenKind;
+use std::fmt::{self, Display, Formatter};
 
 #[derive(Debug, PartialOrd, PartialEq)]
 pub enum Op {
@@ -8,6 +9,18 @@ pub enum Op {
     Sub,
     Mul,
     Div,
+}
+
+impl Display for Op {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            Op::Add => write!(f, "+")?,
+            Op::Sub => write!(f, "-")?,
+            Op::Mul => write!(f, "*")?,
+            Op::Div => write!(f, "/")?
+        };
+        Ok(())
+    }
 }
 
 impl FromStr for Op {

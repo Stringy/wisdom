@@ -2,6 +2,7 @@ use std::str::Chars;
 use std::iter::Peekable;
 
 use crate::tokens::{Token, TokenKind};
+use std::collections::VecDeque;
 
 //
 pub struct Cursor<'a> {
@@ -145,7 +146,7 @@ pub fn tokenize(input: &str) -> impl Iterator<Item=Token> + '_ {
 }
 
 pub struct Tokens {
-    tokens: Vec<Token>,
+    tokens: VecDeque<Token>,
     prev: Option<Token>,
 }
 
@@ -180,7 +181,7 @@ impl Tokens {
 
     pub fn peek(&mut self) -> Option<Token> {
         if self.prev.is_none() {
-            self.prev = self.tokens.pop();
+            self.prev = self.tokens.pop_front();
         }
         self.prev.clone()
     }
@@ -191,7 +192,7 @@ impl Tokens {
             self.prev = None;
             tok
         } else {
-            self.tokens.pop()
+            self.tokens.pop_front()
         }
     }
 }
