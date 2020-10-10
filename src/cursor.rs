@@ -97,10 +97,16 @@ impl Cursor<'_> {
                 Number
             }
 
+            ch if self.is_ident_start(ch) => {
+                self.consume_until(|c| !c.is_alphanumeric());
+                Identifier
+            }
+
             '+' => Add,
             '-' => Sub,
             '*' => Mul,
             '/' => Div,
+            '=' => Equals,
 
             _ => panic!("invalid character: {:?}", ch)
         };
@@ -113,6 +119,10 @@ impl Cursor<'_> {
         token
     }
 
+    fn is_ident_start(&self, c: char) -> bool {
+        c.is_alphabetic() || c == '_'
+    }
+
     fn consume_until<F: FnOnce(char) -> bool + Copy>(&mut self, func: F) {
         let mut c = self.first();
 
@@ -120,6 +130,7 @@ impl Cursor<'_> {
             if func(c) {
                 break;
             }
+
             self.next();
             c = self.first();
         }
@@ -216,6 +227,16 @@ mod test {
             Token { kind: TokenKind::Add, literal: "+".to_string() },
             Token { kind: TokenKind::Whitespace, literal: " ".to_string() },
             Token { kind: TokenKind::Number, literal: "1".to_string() },
+        ];
+
+        assert_eq!(&tokens[..], &expected[..]);
+    }
+
+    #[test]
+    fn test_cursor_ident() {
+        let tokens: Vec<Token> = tokenize("identifier").collect();
+        let expected = vec![
+            Token { kind: TokenKind::Identifier, literal: "identifier".to_string() }
         ];
 
         assert_eq!(&tokens[..], &expected[..]);

@@ -33,15 +33,6 @@ impl FromTokens for Number {
     }
 }
 
-// impl FromCursor for Number {
-//     type Error = ();
-//
-//     fn from_cursor(cursor: &mut Cursor) -> Result<Self, Self::Error> {
-//         let tok = cursor.expect(TokenKind::Number).unwrap(); // .ok_or(())?;
-//         Self::from_str(tok.literal.as_str()).map_err(|_| ())
-//     }
-// }
-//
 #[cfg(test)]
 mod test {
     use super::*;

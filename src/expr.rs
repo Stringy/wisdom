@@ -22,7 +22,6 @@ impl FromTokens for Expr {
     type Error = ();
 
     fn from_tokens(iter: &mut Tokens) -> Result<Self, Self::Error> {
-        iter.skip_whitespace();
         let lhs = Number::from_tokens(iter)?;
         iter.skip_whitespace();
         let op = Op::from_tokens(iter)?;

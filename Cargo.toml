@@ -12,3 +12,4 @@ edition = "2018"
 
 [dependencies]
 #tokenizer = { path = "old/tokenizer" }
+lazy_static = "1.4.0"

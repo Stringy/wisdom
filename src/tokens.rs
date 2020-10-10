@@ -7,12 +7,14 @@ pub struct Token {
 #[derive(Debug, PartialOrd, PartialEq, Clone)]
 pub enum TokenKind {
     Invalid,
+    Identifier,
     Whitespace,
     Number,
     Add,
     Sub,
     Mul,
     Div,
+    Equals,
 }
 
 impl TokenKind {
