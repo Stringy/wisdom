@@ -1,9 +1,0 @@
-
-fn do_regex(a: str, b: regex) -> bool {
-    a ~= b
-}
-
-reg = /[helo]{5}/;
-
-print("hello matches /[helo]{5}/? " + do_regex("hello", /[helo]{5}/));
-print("hello matches /[helo]{5}/? " + do_regex("hello", reg));

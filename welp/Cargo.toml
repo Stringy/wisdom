@@ -1,0 +1,12 @@
+[package]
+name = "welp"
+version = "0.1.0"
+authors = ["gh <gh@gh>"]
+edition = "2018"
+default-run = "welp"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+lazy_static = "1.4.0"
+wisdom = { path = "../wisdom" }
