@@ -10,8 +10,8 @@ use lazy_static::lazy_static;
 
 use std::io::{BufReader, Write};
 
-use wisdom::tokenizer::cursor::{Tokens, FromTokens};
-use wisdom::tokenizer::tokens::TokenKind;
+use wisdom::tokenizer::token::{Tokens, FromTokens};
+use wisdom::tokenizer::token::TokenKind;
 use wisdom::ast::binding::Binding;
 use wisdom::ast::expr::Expr;
 

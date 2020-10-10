@@ -1,6 +1,7 @@
+use tokenizer::token::{FromTokens, Tokens};
+
 use crate::number::Number;
 use crate::operation::Op;
-use tokenizer::cursor::{FromTokens, Tokens};
 
 pub struct Expr {
     lhs: Number,

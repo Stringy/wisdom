@@ -1,8 +1,8 @@
 use std::str::FromStr;
 use std::num::{ParseIntError};
 use std::fmt::{self, Display, Formatter};
-use tokenizer::cursor::{FromTokens, Tokens};
-use tokenizer::tokens::TokenKind;
+use tokenizer::token::{FromTokens, Tokens};
+use tokenizer::token::TokenKind;
 
 #[derive(Debug, PartialOrd, PartialEq)]
 pub struct Number(pub i64);

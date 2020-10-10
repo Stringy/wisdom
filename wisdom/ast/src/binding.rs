@@ -1,7 +1,7 @@
 use crate::expr::Expr;
 use crate::number::Number;
-use tokenizer::cursor::{FromTokens, Tokens};
-use tokenizer::tokens::TokenKind;
+use tokenizer::token::{FromTokens, Tokens};
+use tokenizer::token::TokenKind;
 
 pub struct Binding {
     name: String,

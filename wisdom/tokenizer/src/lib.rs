@@ -1,5 +1,5 @@
 pub mod cursor;
-pub mod tokens;
+pub mod token;
 
 #[cfg(test)]
 mod tests {

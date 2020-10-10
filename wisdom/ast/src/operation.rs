@@ -1,7 +1,8 @@
-use std::str::FromStr;
 use std::fmt::{self, Display, Formatter};
-use tokenizer::cursor::{FromTokens, Tokens};
-use tokenizer::tokens::TokenKind;
+use std::str::FromStr;
+
+use tokenizer::token::{FromTokens, Tokens};
+use tokenizer::token::TokenKind;
 
 #[derive(Debug, PartialOrd, PartialEq)]
 pub enum Op {

@@ -1,10 +1,14 @@
 use std::str::Chars;
 use std::iter::Peekable;
 
-use crate::tokens::{Token, TokenKind};
+use crate::token::{Token, TokenKind};
 use std::collections::VecDeque;
 
-//
+///
+/// A Cursor is responsible for breaking up an input
+/// string into Tokens. It emits a single token at a time
+/// and can be used to construct iterators over the input.
+///
 pub struct Cursor<'a> {
     /// Total size of the input
     size: usize,
@@ -20,6 +24,9 @@ pub struct Cursor<'a> {
 }
 
 impl<'a> Cursor<'a> {
+    ///
+    /// Constructs a new Cursor from the input string.
+    ///
     pub fn new(input: &'a str) -> Self {
         Self {
             size: input.len(),
@@ -52,7 +59,9 @@ impl<'a> Cursor<'a> {
     }
 
     ///
-    ///
+    /// Consume and return the next character in the string.
+    /// If there are no more characters, this function will return
+    /// None
     ///
     pub fn next(&mut self) -> Option<char> {
         if let Some(ch) = self.chars.next() {
@@ -65,14 +74,18 @@ impl<'a> Cursor<'a> {
     }
 
     ///
-    ///
+    /// Gets a copy of the remaining characters in this Cursor.
     ///
     fn chars(&self) -> Chars<'a> {
         self.chars.clone()
     }
 
     ///
+    /// Gets the nth item in the iterator, without consuming up to
+    /// that point, as you'd normally expect. Instead it will return
+    /// a copy of the nth character or a NUL byte if n is too large.
     ///
+    /// TODO: consider refactoring this potentially enormous copy.
     ///
     fn nth(&self, n: usize) -> char {
         self.chars().nth(n).unwrap_or('\0')
@@ -80,8 +93,22 @@ impl<'a> Cursor<'a> {
 }
 
 impl Cursor<'_> {
+    ///
+    /// Advances the Cursor until it has consumed a complete Token
+    /// and returns.
+    ///
+    /// ```
+    /// use tokenizer::cursor::Cursor;
+    /// use tokenizer::token::TokenKind;
+    ///
+    /// let mut cursor = Cursor::new("123");
+    /// let tok = cursor.next_token();
+    /// assert_eq!(tok.kind, TokenKind::Number);
+    /// assert_eq!(tok.literal.as_str(), "123");
+    /// ```
+    ///
     pub fn next_token(&mut self) -> Token {
-        use crate::tokens::TokenKind::*;
+        use crate::token::TokenKind::*;
 
         self.prev = self.idx;
 
@@ -102,6 +129,7 @@ impl Cursor<'_> {
                 Identifier
             }
 
+            // Handle all the single-character tokens
             '+' => Add,
             '-' => Sub,
             '*' => Mul,
@@ -119,10 +147,24 @@ impl Cursor<'_> {
         token
     }
 
+    ///
+    /// Checks whether the given character is a valid start to an identifier
+    /// i.e. is alphabetic or is an underscore.
+    ///
+    /// Numeric characters are invalid for starting an identifier but
+    /// are allowed within the body of the identifier.
+    ///
     fn is_ident_start(&self, c: char) -> bool {
         c.is_alphabetic() || c == '_'
     }
 
+    ///
+    /// Consumes from the Cursor until the function provided returns true.
+    /// This is useful for seeking forward to the end of a token.
+    ///
+    /// The Cursor will end up in a state where func(c) == true where
+    /// c == self.first()
+    ///
     fn consume_until<F: FnOnce(char) -> bool + Copy>(&mut self, func: F) {
         let mut c = self.first();
 
@@ -131,20 +173,38 @@ impl Cursor<'_> {
                 break;
             }
 
+            // consume the character
             self.next();
+            // peek at the the next one
             c = self.first();
         }
     }
 
+    ///
+    /// The opposite behaviour to consume_until, this function will consume until
+    /// the given function returns false
+    ///
     fn consume_while<F: FnOnce(char) -> bool + Copy>(&mut self, func: F) {
         self.consume_until(|c| !func(c))
     }
 
+    ///
+    /// Returns the number of characters consumed since we last emitted
+    /// a Token.
+    ///
     fn len_consumed(&self) -> usize {
         self.idx - self.prev
     }
 }
 
+///
+/// Creates a Token iterator from the input string.
+///
+/// ```
+/// use tokenizer::cursor::tokenize;
+/// assert_eq!(3, tokenize("1+2").collect::<Vec<_>>().len())
+/// ```
+///
 pub fn tokenize(input: &str) -> impl Iterator<Item=Token> + '_ {
     let mut c = Cursor::new(input);
     std::iter::from_fn(move || {
@@ -156,63 +216,6 @@ pub fn tokenize(input: &str) -> impl Iterator<Item=Token> + '_ {
     })
 }
 
-pub struct Tokens {
-    tokens: VecDeque<Token>,
-    prev: Option<Token>,
-}
-
-impl Tokens {
-    pub fn new(input: &str) -> Self {
-        Self {
-            tokens: tokenize(input).collect(),
-            prev: None,
-        }
-    }
-
-    pub fn skip_whitespace(&mut self) {
-        let mut tok = self.peek();
-        while tok.is_some() && tok.unwrap().kind == TokenKind::Whitespace {
-            self.next();
-            tok = self.peek();
-        }
-    }
-
-    pub fn expect(&mut self, kind: TokenKind) -> Option<Token> {
-        self.expect_any(&[kind])
-    }
-
-    pub fn expect_any(&mut self, kinds: &[TokenKind]) -> Option<Token> {
-        let tok = self.peek()?;
-        if kinds.contains(&tok.kind) {
-            self.next()
-        } else {
-            None
-        }
-    }
-
-    pub fn peek(&mut self) -> Option<Token> {
-        if self.prev.is_none() {
-            self.prev = self.tokens.pop_front();
-        }
-        self.prev.clone()
-    }
-
-    pub fn next(&mut self) -> Option<Token> {
-        if self.prev.is_some() {
-            let tok = self.prev.clone();
-            self.prev = None;
-            tok
-        } else {
-            self.tokens.pop_front()
-        }
-    }
-}
-
-pub trait FromTokens: Sized {
-    type Error;
-
-    fn from_tokens(iter: &mut Tokens) -> Result<Self, Self::Error>;
-}
 
 #[cfg(test)]
 mod test {
