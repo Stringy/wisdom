@@ -1,7 +1,3 @@
-mod number;
-mod operation;
-mod expr;
-mod binding;
 mod traits;
 mod interp;
 
@@ -9,16 +5,16 @@ use std::fs::File;
 
 extern crate lazy_static;
 extern crate wisdom_tokenizer;
+extern crate wisdom_ast;
 
 use lazy_static::lazy_static;
 
 use std::io::{BufReader, Write};
 
-use crate::expr::Expr;
-use crate::binding::Binding;
-
 use wisdom_tokenizer::cursor::{Tokens, FromTokens};
 use wisdom_tokenizer::tokens::TokenKind;
+use wisdom_ast::binding::Binding;
+use wisdom_ast::expr::Expr;
 
 fn do_write(msg: &str) {
     std::io::stdout().write(msg.as_bytes()).unwrap();

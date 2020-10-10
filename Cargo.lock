@@ -10,6 +10,14 @@ name = "wisdom"
 version = "0.1.0"
 dependencies = [
  "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "wisdom-ast 0.1.0",
+ "wisdom-tokenizer 0.1.0",
+]
+
+[[package]]
+name = "wisdom-ast"
+version = "0.1.0"
+dependencies = [
  "wisdom-tokenizer 0.1.0",
 ]
 

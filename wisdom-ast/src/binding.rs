@@ -1,5 +1,4 @@
 use crate::expr::Expr;
-use crate::traits::Executable;
 use crate::number::Number;
 use wisdom_tokenizer::cursor::{FromTokens, Tokens};
 use wisdom_tokenizer::tokens::TokenKind;
@@ -33,13 +32,5 @@ impl FromTokens for Binding {
             name: name_ident.literal.clone(),
             value: expr,
         })
-    }
-}
-
-impl Executable<Number> for Binding {
-    type Err = ();
-
-    fn execute(&self) -> Result<Number, Self::Err> {
-        Ok(self.value.execute())
     }
 }
