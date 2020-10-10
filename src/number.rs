@@ -1,8 +1,8 @@
 use std::str::FromStr;
 use std::num::{ParseIntError};
-use crate::cursor::{FromTokens, Cursor, Tokens};
-use crate::tokens::TokenKind;
 use std::fmt::{self, Display, Formatter};
+use wisdom_tokenizer::cursor::{FromTokens, Tokens};
+use wisdom_tokenizer::tokens::TokenKind;
 
 #[derive(Debug, PartialOrd, PartialEq)]
 pub struct Number(pub i64);

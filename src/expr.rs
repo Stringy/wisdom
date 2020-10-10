@@ -1,6 +1,6 @@
 use crate::number::Number;
 use crate::operation::Op;
-use crate::cursor::{FromTokens, Cursor, Tokens};
+use wisdom_tokenizer::cursor::{FromTokens, Tokens};
 
 pub struct Expr {
     lhs: Number,

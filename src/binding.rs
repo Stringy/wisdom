@@ -1,8 +1,8 @@
 use crate::expr::Expr;
-use crate::cursor::{FromTokens, Tokens};
-use crate::tokens::TokenKind;
 use crate::traits::Executable;
 use crate::number::Number;
+use wisdom_tokenizer::cursor::{FromTokens, Tokens};
+use wisdom_tokenizer::tokens::TokenKind;
 
 pub struct Binding {
     name: String,

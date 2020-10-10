@@ -1,7 +1,7 @@
 use std::str::FromStr;
-use crate::cursor::{FromTokens, Cursor, Tokens};
-use crate::tokens::TokenKind;
 use std::fmt::{self, Display, Formatter};
+use wisdom_tokenizer::cursor::{FromTokens, Tokens};
+use wisdom_tokenizer::tokens::TokenKind;
 
 #[derive(Debug, PartialOrd, PartialEq)]
 pub enum Op {
@@ -48,20 +48,6 @@ impl FromTokens for Op {
     }
 }
 
-// impl FromCursor for Op {
-//     type Error = ();
-//
-//     fn from_cursor(cursor: &mut Cursor) -> Result<Self, Self::Error> {
-//         let tok = cursor.expect_any(&[
-//             TokenKind::Add,
-//             TokenKind::Sub,
-//             TokenKind::Mul,
-//             TokenKind::Div
-//         ]).ok_or(())?;
-//         Self::from_str(tok.literal.as_str()).map_err(|_| ())
-//     }
-// }
-//
 #[cfg(test)]
 mod test {
     use super::*;

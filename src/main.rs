@@ -1,22 +1,24 @@
 mod number;
 mod operation;
 mod expr;
-mod cursor;
-mod tokens;
 mod binding;
 mod traits;
+mod interp;
 
 use std::fs::File;
 
 extern crate lazy_static;
+extern crate wisdom_tokenizer;
 
 use lazy_static::lazy_static;
 
 use std::io::{BufReader, Write};
-use crate::cursor::{Tokens, FromTokens};
+
 use crate::expr::Expr;
-use crate::tokens::TokenKind;
 use crate::binding::Binding;
+
+use wisdom_tokenizer::cursor::{Tokens, FromTokens};
+use wisdom_tokenizer::tokens::TokenKind;
 
 fn do_write(msg: &str) {
     std::io::stdout().write(msg.as_bytes()).unwrap();
