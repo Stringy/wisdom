@@ -4,17 +4,16 @@ mod interp;
 use std::fs::File;
 
 extern crate lazy_static;
-extern crate wisdom_tokenizer;
-extern crate wisdom_ast;
+extern crate wisdom;
 
 use lazy_static::lazy_static;
 
 use std::io::{BufReader, Write};
 
-use wisdom_tokenizer::cursor::{Tokens, FromTokens};
-use wisdom_tokenizer::tokens::TokenKind;
-use wisdom_ast::binding::Binding;
-use wisdom_ast::expr::Expr;
+use wisdom::tokenizer::cursor::{Tokens, FromTokens};
+use wisdom::tokenizer::tokens::TokenKind;
+use wisdom::ast::binding::Binding;
+use wisdom::ast::expr::Expr;
 
 fn do_write(msg: &str) {
     std::io::stdout().write(msg.as_bytes()).unwrap();

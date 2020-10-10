@@ -3,4 +3,4 @@ pub mod expr;
 pub mod number;
 pub mod operation;
 
-extern crate wisdom_tokenizer;
+extern crate tokenizer;

@@ -1,7 +1,7 @@
 use std::str::FromStr;
 use std::fmt::{self, Display, Formatter};
-use wisdom_tokenizer::cursor::{FromTokens, Tokens};
-use wisdom_tokenizer::tokens::TokenKind;
+use tokenizer::cursor::{FromTokens, Tokens};
+use tokenizer::tokens::TokenKind;
 
 #[derive(Debug, PartialOrd, PartialEq)]
 pub enum Op {
