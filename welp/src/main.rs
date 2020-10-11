@@ -10,8 +10,7 @@ use lazy_static::lazy_static;
 
 use std::io::{BufReader, Write};
 
-use wisdom::tokenizer::token::{Tokens, FromTokens};
-use wisdom::tokenizer::token::TokenKind;
+use wisdom::tokenizer::{TokenKind, TokenStream, FromTokens};
 use wisdom::ast::binding::Binding;
 use wisdom::ast::expr::Expr;
 
@@ -30,7 +29,7 @@ fn main() {
     loop {
         do_write(">>> ");
         let line = get_input();
-        let mut tokens = Tokens::new(line.as_str());
+        let mut tokens = TokenStream::new(line.as_str());
 
         tokens.skip_whitespace();
 

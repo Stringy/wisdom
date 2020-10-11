@@ -1,8 +1,7 @@
 use std::str::FromStr;
 use std::num::{ParseIntError};
 use std::fmt::{self, Display, Formatter};
-use tokenizer::token::{FromTokens, Tokens};
-use tokenizer::token::TokenKind;
+use tokenizer::{TokenKind, FromTokens, TokenStream};
 
 #[derive(Debug, PartialOrd, PartialEq)]
 pub struct Number(pub i64);
@@ -27,7 +26,7 @@ impl FromStr for Number {
 impl FromTokens for Number {
     type Error = ();
 
-    fn from_tokens(iter: &mut Tokens) -> Result<Self, Self::Error> {
+    fn from_tokens(iter: &mut TokenStream) -> Result<Self, Self::Error> {
         let tok = iter.expect(TokenKind::Number).ok_or(())?;
         Self::from_str(tok.literal.as_str()).map_err(|_| ())
     }

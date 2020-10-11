@@ -1,7 +1,7 @@
 use crate::expr::Expr;
 use crate::number::Number;
-use tokenizer::token::{FromTokens, Tokens};
-use tokenizer::token::TokenKind;
+use tokenizer::{FromTokens, TokenStream};
+use tokenizer::TokenKind;
 
 pub struct Binding {
     name: String,
@@ -11,7 +11,7 @@ pub struct Binding {
 impl FromTokens for Binding {
     type Error = ();
 
-    fn from_tokens(iter: &mut Tokens) -> Result<Self, Self::Error> {
+    fn from_tokens(iter: &mut TokenStream) -> Result<Self, Self::Error> {
         let let_ident = iter.expect(TokenKind::Identifier).ok_or(())?;
         if let_ident.literal != "let" {
             return Err(());

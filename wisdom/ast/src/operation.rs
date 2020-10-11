@@ -1,8 +1,7 @@
 use std::fmt::{self, Display, Formatter};
 use std::str::FromStr;
 
-use tokenizer::token::{FromTokens, Tokens};
-use tokenizer::token::TokenKind;
+use tokenizer::{TokenKind, FromTokens, TokenStream};
 
 #[derive(Debug, PartialOrd, PartialEq)]
 pub enum Op {
@@ -41,7 +40,7 @@ impl FromStr for Op {
 impl FromTokens for Op {
     type Error = ();
 
-    fn from_tokens(iter: &mut Tokens) -> Result<Self, Self::Error> {
+    fn from_tokens(iter: &mut TokenStream) -> Result<Self, Self::Error> {
         let tok = iter.expect_any(&[
             TokenKind::Add, TokenKind::Sub, TokenKind::Mul, TokenKind::Div]
         ).ok_or(())?;

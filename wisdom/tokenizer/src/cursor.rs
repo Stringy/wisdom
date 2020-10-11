@@ -85,7 +85,7 @@ impl<'a> Cursor<'a> {
     /// that point, as you'd normally expect. Instead it will return
     /// a copy of the nth character or a NUL byte if n is too large.
     ///
-    /// TODO: consider refactoring this potentially enormous copy.
+    /// TODO: consider refactoring this potentially enormous and frequent copy.
     ///
     fn nth(&self, n: usize) -> char {
         self.chars().nth(n).unwrap_or('\0')
@@ -98,8 +98,8 @@ impl Cursor<'_> {
     /// and returns.
     ///
     /// ```
-    /// use tokenizer::cursor::Cursor;
-    /// use tokenizer::token::TokenKind;
+    /// use tokenizer::Cursor;
+    /// use tokenizer::TokenKind;
     ///
     /// let mut cursor = Cursor::new("123");
     /// let tok = cursor.next_token();
@@ -185,6 +185,7 @@ impl Cursor<'_> {
     /// the given function returns false
     ///
     fn consume_while<F: FnOnce(char) -> bool + Copy>(&mut self, func: F) {
+        // TODO: is there a better way of wrapping the func like this?
         self.consume_until(|c| !func(c))
     }
 
@@ -201,7 +202,7 @@ impl Cursor<'_> {
 /// Creates a Token iterator from the input string.
 ///
 /// ```
-/// use tokenizer::cursor::tokenize;
+/// use tokenizer::tokenize;
 /// assert_eq!(3, tokenize("1+2").collect::<Vec<_>>().len())
 /// ```
 ///

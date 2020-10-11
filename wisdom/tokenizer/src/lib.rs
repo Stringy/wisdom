@@ -1,10 +1,7 @@
-pub mod cursor;
-pub mod token;
+mod cursor;
+mod token;
+mod token_stream;
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
-}
+pub use cursor::*;
+pub use token::*;
+pub use token_stream::*;

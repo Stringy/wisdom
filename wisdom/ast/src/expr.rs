@@ -1,4 +1,4 @@
-use tokenizer::token::{FromTokens, Tokens};
+use tokenizer::{FromTokens, TokenStream};
 
 use crate::number::Number;
 use crate::operation::Op;
@@ -22,7 +22,7 @@ impl Expr {
 impl FromTokens for Expr {
     type Error = ();
 
-    fn from_tokens(iter: &mut Tokens) -> Result<Self, Self::Error> {
+    fn from_tokens(iter: &mut TokenStream) -> Result<Self, Self::Error> {
         let lhs = Number::from_tokens(iter)?;
         iter.skip_whitespace();
         let op = Op::from_tokens(iter)?;
@@ -55,34 +55,34 @@ mod test {
 
     #[test]
     fn test_expr_from_cursor() {
-        let mut tokens = Tokens::new("1 + 1");
+        let mut tokens = TokenStream::new("1 + 1");
         let expr = Expr::from_tokens(&mut tokens).unwrap();
     }
 
     #[test]
     fn test_execute_expr_add() {
-        let mut tokens = Tokens::new("1 + 1");
+        let mut tokens = TokenStream::new("1 + 1");
         let expr = Expr::from_tokens(&mut tokens).unwrap();
         assert_eq!(Number(2), expr.execute())
     }
 
     #[test]
     fn test_execute_expr_sub() {
-        let mut tokens = Tokens::new("1 - 1");
+        let mut tokens = TokenStream::new("1 - 1");
         let expr = Expr::from_tokens(&mut tokens).unwrap();
         assert_eq!(Number(0), expr.execute())
     }
 
     #[test]
     fn test_execute_expr_mul() {
-        let mut tokens = Tokens::new("2 * 2");
+        let mut tokens = TokenStream::new("2 * 2");
         let expr = Expr::from_tokens(&mut tokens).unwrap();
         assert_eq!(Number(4), expr.execute())
     }
 
     #[test]
     fn test_execute_expr_div() {
-        let mut tokens = Tokens::new("2 / 2");
+        let mut tokens = TokenStream::new("2 / 2");
         let expr = Expr::from_tokens(&mut tokens).unwrap();
         assert_eq!(Number(1), expr.execute())
     }
