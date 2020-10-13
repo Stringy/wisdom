@@ -58,7 +58,7 @@ impl FromTokens for Expr {
                     operands.push_back(Expr::Leaf(Value::from_tokens(tokens)?));
                 }
                 TokenKind::SemiColon => break,
-                _ => return Err(());
+                _ => return Err(())
             }
 
             tokens.next();
