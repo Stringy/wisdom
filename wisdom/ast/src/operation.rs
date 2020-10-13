@@ -5,8 +5,6 @@ use tokenizer::{TokenKind, FromTokens, TokenStream};
 
 #[derive(Debug, PartialOrd, PartialEq, Copy, Clone)]
 pub enum Op {
-    // Has the lowest possible precendence.
-    Sentinel,
     Add,
     Sub,
     Mul,
@@ -16,7 +14,6 @@ pub enum Op {
 impl Op {
     pub fn precendence(self) -> usize {
         match self {
-            Op::Sentinel => 0,
             Op::Add | Op::Sub => 3,
             Op::Mul | Op::Div => 4
         }
@@ -26,7 +23,6 @@ impl Op {
 impl Display for Op {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
-            Op::Sentinel => panic!("why are we displaying a sentinel?"),
             Op::Add => write!(f, "+")?,
             Op::Sub => write!(f, "-")?,
             Op::Mul => write!(f, "*")?,

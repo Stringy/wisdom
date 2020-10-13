@@ -7,6 +7,8 @@ use std::ops::Add;
 use crate::value::Value;
 use std::collections::VecDeque;
 
+use crate::ext::*;
+
 // pub struct Expr {
 //     kind: ExprKind<Number>,
 // }
@@ -43,15 +45,19 @@ impl FromTokens for Expr {
                 }
                 _ if tok.kind.is_operator() => {
                     let op = Op::from_tokens(tokens)?;
-                    let top = operators.get(0).unwrap_or(&Op::Sentinel);
-                    if top.precendence() < op.precendence() {
-                        // op has higher precedence, so push it
-                        operators.push_back(op);
+                    if let Some(top) = operators.get(0) {
+                        if top.precendence() < op.precendence() {
+                            // op has higher precedence, so push it
+                            operators.push_back(op);
+                        } else {
+                            // construct a tree
+                            let (rhs, lhs) = operands.pop_back_two().ok_or(())?;
+                            operands.push_back(Expr::new_tree(lhs, op, rhs));
+                        }
                     } else {
-                        // construct a tree
-                        let rhs = operands.pop_back().ok_or(())?;
-                        let lhs = operands.pop_back().ok_or(())?;
-                        operands.push_back(Expr::new_tree(lhs, op, rhs));
+                        // first operator or no previous operators, so always
+                        // push
+                        operators.push_back(op);
                     }
                 }
                 TokenKind::Number | TokenKind::Identifier => {
@@ -67,8 +73,7 @@ impl FromTokens for Expr {
 
         while operators.len() > 0 {
             let op = operators.pop_back().ok_or(())?;
-            let rhs = operands.pop_back().ok_or(())?;
-            let lhs = operands.pop_back().ok_or(())?;
+            let (rhs, lhs) = operands.pop_back_two().ok_or(())?;
             let tree = Expr::new_tree(lhs, op, rhs);
             operands.push_back(tree);
         }

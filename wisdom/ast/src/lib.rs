@@ -5,5 +5,6 @@ pub mod operation;
 pub mod arena;
 mod error;
 mod value;
+mod ext;
 
 extern crate tokenizer;
