@@ -45,7 +45,7 @@ fn main() {
             } else {
                 let expr = Expr::from_tokens(&mut tokens);
                 match expr {
-                    Ok(expr) => do_write(format!("{}\n", expr.execute()).as_str()),
+                    Ok(expr) => do_write(format!("{:?}\n", expr.execute()).as_str()),
                     Err(_) => do_write("Invalid input\n")
                 }
             }

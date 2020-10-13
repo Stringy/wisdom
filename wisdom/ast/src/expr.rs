@@ -1,51 +1,93 @@
-use tokenizer::{FromTokens, TokenStream};
+use tokenizer::{FromTokens, TokenStream, TokenKind, Token};
 
 use crate::number::Number;
 use crate::operation::Op;
+use std::str::FromStr;
+use std::ops::Add;
+use crate::value::Value;
+use std::collections::VecDeque;
 
-pub struct Expr {
-    lhs: Number,
-    rhs: Number,
-    op: Op,
+use crate::ext::*;
+
+// pub struct Expr {
+//     kind: ExprKind<Number>,
+// }
+
+
+#[derive(Debug, PartialOrd, PartialEq)]
+pub enum Expr {
+    Leaf(Value),
+    Tree(Box<Expr>, Op, Box<Expr>),
 }
 
 impl Expr {
-    pub fn new(lhs: Number, rhs: Number, op: Op) -> Self {
-        Self {
-            lhs,
-            rhs,
-            op,
-        }
+    pub fn new_tree(lhs: Expr, op: Op, rhs: Expr) -> Self {
+        Expr::Tree(Box::new(lhs), op, Box::new(rhs))
+    }
+
+    pub fn new_leaf(v: Value) -> Self {
+        Expr::Leaf(v)
     }
 }
 
 impl FromTokens for Expr {
     type Error = ();
 
-    fn from_tokens(iter: &mut TokenStream) -> Result<Self, Self::Error> {
-        let lhs = Number::from_tokens(iter)?;
-        iter.skip_whitespace();
-        let op = Op::from_tokens(iter)?;
-        iter.skip_whitespace();
-        let rhs = Number::from_tokens(iter)?;
+    fn from_tokens(tokens: &mut TokenStream) -> Result<Self, Self::Error> {
+        let mut operators: VecDeque<Op> = VecDeque::new();
+        let mut operands: VecDeque<Expr> = VecDeque::new();
 
-        Ok(Self {
-            lhs,
-            op,
-            rhs,
-        })
+        let mut peeked = tokens.peek();
+        while let Some(tok) = peeked.clone() {
+            match tok.kind {
+                TokenKind::Whitespace => {
+                    // ignore any whitespace, we don't care
+                }
+                _ if tok.kind.is_operator() => {
+                    let op = Op::from_tokens(tokens)?;
+                    if let Some(top) = operators.get(0) {
+                        if top.precendence() < op.precendence() {
+                            // op has higher precedence, so push it
+                            operators.push_back(op);
+                        } else {
+                            // construct a tree
+                            let (rhs, lhs) = operands.pop_back_two().ok_or(())?;
+                            operands.push_back(Expr::new_tree(lhs, op, rhs));
+                        }
+                    } else {
+                        // first operator or no previous operators, so always
+                        // push
+                        operators.push_back(op);
+                    }
+                }
+                TokenKind::Number | TokenKind::Identifier => {
+                    operands.push_back(Expr::Leaf(Value::from_tokens(tokens)?));
+                }
+                TokenKind::SemiColon => break,
+                _ => return Err(())
+            }
+
+            tokens.next();
+            peeked = tokens.peek();
+        }
+
+        while operators.len() > 0 {
+            let op = operators.pop_back().ok_or(())?;
+            let (rhs, lhs) = operands.pop_back_two().ok_or(())?;
+            let tree = Expr::new_tree(lhs, op, rhs);
+            operands.push_back(tree);
+        }
+
+        Ok(operands.pop_back().ok_or(())?)
     }
 }
 
+// 1 + 1 * 2
+// Tree(Leaf(Int(1)), +, Tree(Leaf(Int(1)), *, Leaf(Int(2)))
+
 impl Expr {
-    pub fn execute(&self) -> Number {
-        let result = match self.op {
-            Op::Add => self.lhs.0 + self.rhs.0,
-            Op::Sub => self.lhs.0 - self.rhs.0,
-            Op::Mul => self.lhs.0 * self.rhs.0,
-            Op::Div => self.lhs.0 / self.rhs.0
-        };
-        Number(result)
+    pub fn execute(self) -> Result<Value, ()> {
+        Err(())
     }
 }
 
@@ -54,36 +96,25 @@ mod test {
     use super::*;
 
     #[test]
-    fn test_expr_from_cursor() {
+    fn test_expr_simple() {
         let mut tokens = TokenStream::new("1 + 1");
         let expr = Expr::from_tokens(&mut tokens).unwrap();
+        let (leaf_a, leaf_b) = (Expr::new_leaf(Value::Int(1)), Expr::new_leaf(Value::Int(1)));
+        let expected = Expr::new_tree(leaf_a, Op::Add, leaf_b);
+
+        assert_eq!(expr, expected);
     }
 
     #[test]
-    fn test_execute_expr_add() {
-        let mut tokens = TokenStream::new("1 + 1");
+    fn test_expr_multi() {
+        let mut tokens = TokenStream::new("1 + 1 * 5");
         let expr = Expr::from_tokens(&mut tokens).unwrap();
-        assert_eq!(Number(2), expr.execute())
-    }
+        let expected = Expr::new_tree(
+            Expr::new_leaf(Value::Int(1)), Op::Add, Expr::new_tree(
+                Expr::new_leaf(Value::Int(1)), Op::Mul, Expr::new_leaf(Value::Int(5)),
+            ),
+        );
 
-    #[test]
-    fn test_execute_expr_sub() {
-        let mut tokens = TokenStream::new("1 - 1");
-        let expr = Expr::from_tokens(&mut tokens).unwrap();
-        assert_eq!(Number(0), expr.execute())
-    }
-
-    #[test]
-    fn test_execute_expr_mul() {
-        let mut tokens = TokenStream::new("2 * 2");
-        let expr = Expr::from_tokens(&mut tokens).unwrap();
-        assert_eq!(Number(4), expr.execute())
-    }
-
-    #[test]
-    fn test_execute_expr_div() {
-        let mut tokens = TokenStream::new("2 / 2");
-        let expr = Expr::from_tokens(&mut tokens).unwrap();
-        assert_eq!(Number(1), expr.execute())
+        assert_eq!(expr, expected);
     }
 }

@@ -3,12 +3,21 @@ use std::str::FromStr;
 
 use tokenizer::{TokenKind, FromTokens, TokenStream};
 
-#[derive(Debug, PartialOrd, PartialEq)]
+#[derive(Debug, PartialOrd, PartialEq, Copy, Clone)]
 pub enum Op {
     Add,
     Sub,
     Mul,
     Div,
+}
+
+impl Op {
+    pub fn precendence(self) -> usize {
+        match self {
+            Op::Add | Op::Sub => 3,
+            Op::Mul | Op::Div => 4
+        }
+    }
 }
 
 impl Display for Op {
