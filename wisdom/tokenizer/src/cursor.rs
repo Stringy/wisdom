@@ -135,6 +135,7 @@ impl Cursor<'_> {
             '*' => Mul,
             '/' => Div,
             '=' => Equals,
+            ';' => SemiColon,
 
             _ => panic!("invalid character: {:?}", ch)
         };
