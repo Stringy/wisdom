@@ -60,7 +60,24 @@ impl TokenStream {
     }
 
     ///
-    /// Look ahead at the next token without consuming it.
+    /// If the next non-whitespace `Token` matches the provided `TokenKind`, return it,
+    /// otherwise returns `None`
+    ///
+    pub fn expect_ignore_ws(&mut self, kind: TokenKind) -> Option<Token> {
+        self.expect_any_ignore_ws(&[kind])
+    }
+
+    ///
+    /// If the next non-whitespace `Token` matches any of the provided `TokenKind`s,
+    /// return it, otherwise returns `None`
+    ///
+    pub fn expect_any_ignore_ws(&mut self, kinds: &[TokenKind]) -> Option<Token> {
+        self.skip_whitespace();
+        self.expect_any(kinds)
+    }
+
+    ///
+    /// Look ahead at the next `Token` without consuming it.
     ///
     /// ```
     /// use tokenizer::{TokenStream, Token, TokenKind};
@@ -86,7 +103,7 @@ impl TokenStream {
     }
 
     ///
-    /// Returns and consumes the next token in the list.
+    /// Returns and consumes the next `Token` in the list.
     ///
     /// ```
     /// use tokenizer::{Token, TokenStream};

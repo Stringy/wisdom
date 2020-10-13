@@ -30,6 +30,7 @@ pub enum TokenKind {
     Mul,
     Div,
     Equals,
+    SemiColon,
 }
 
 impl TokenKind {
@@ -37,7 +38,7 @@ impl TokenKind {
     /// Returns whether this TokenKind is an arithmetic operator,
     /// otherwise returns false.
     ///
-    pub fn is_arithmetic_operator(&self) -> bool {
+    pub fn is_operator(&self) -> bool {
         *self == TokenKind::Add ||
             *self == TokenKind::Sub ||
             *self == TokenKind::Mul ||
@@ -50,8 +51,8 @@ mod test {
     use super::*;
 
     #[test]
-    fn test_is_arithmetic_operator() {
-        assert!(TokenKind::Add.is_arithmetic_operator());
-        assert!(!TokenKind::Invalid.is_arithmetic_operator());
+    fn test_is_operator() {
+        assert!(TokenKind::Add.is_operator());
+        assert!(!TokenKind::Invalid.is_operator());
     }
 }
