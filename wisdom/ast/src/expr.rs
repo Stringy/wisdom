@@ -45,6 +45,12 @@ impl FromTokens for Expr {
                 TokenKind::Whitespace => {
                     // ignore any whitespace, we don't care
                 }
+                TokenKind::LeftParen => {
+                    tokens.consume();
+
+                    // recurse to calculate the sub-expression
+                    operands.push_back(Expr::from_tokens(tokens)?);
+                }
                 _ if tok.kind.is_operator() => {
                     let op = Op::from_tokens(tokens)?;
                     if let Some(top) = operators.get(0) {
@@ -65,11 +71,11 @@ impl FromTokens for Expr {
                 TokenKind::Number | TokenKind::Identifier => {
                     operands.push_back(Expr::Leaf(Value::from_tokens(tokens)?));
                 }
-                TokenKind::SemiColon => break,
+                TokenKind::SemiColon | TokenKind::RightParen => break,
                 _ => return Err(Error::from(ErrorKind::InvalidToken))
             }
 
-            tokens.next();
+            tokens.consume();
             peeked = tokens.peek();
         }
 
@@ -83,9 +89,6 @@ impl FromTokens for Expr {
         Ok(operands.pop_back().ok_or(Error::from(InvalidToken))?)
     }
 }
-
-// 1 + 1 * 2
-// Tree(Leaf(Int(1)), +, Tree(Leaf(Int(1)), *, Leaf(Int(2)))
 
 impl Expr {
     pub fn execute(self) -> Result<Value, ()> {
@@ -114,6 +117,41 @@ mod test {
         let expected = Expr::new_tree(
             Expr::new_leaf(Value::Int(1)), Op::Add, Expr::new_tree(
                 Expr::new_leaf(Value::Int(1)), Op::Mul, Expr::new_leaf(Value::Int(5)),
+            ),
+        );
+
+        assert_eq!(expr, expected);
+    }
+
+    #[test]
+    fn test_expr_parens() {
+        let mut tokens = TokenStream::new("(1 + 1) * 5");
+        let expr = Expr::from_tokens(&mut tokens).unwrap();
+
+        let expected = Expr::new_tree(
+            Expr::new_tree(Expr::Leaf(Value::Int(1)), Op::Add, Expr::Leaf(Value::Int(1))),
+            Op::Mul,
+            Expr::Leaf(Value::Int(5)),
+        );
+
+        assert_eq!(expr, expected);
+    }
+
+    #[test]
+    fn test_expr_complex() {
+        let mut tokens = TokenStream::new("(2 * (5 + 7)) * (6 + 2)");
+        let expr = Expr::from_tokens(&mut tokens).unwrap();
+        let expected = Expr::new_tree(
+            Expr::new_tree(
+                Expr::Leaf(Value::Int(2)),
+                Op::Mul,
+                Expr::new_tree(Expr::Leaf(Value::Int(5)), Op::Add, Expr::Leaf(Value::Int(7))),
+            ),
+            Op::Mul,
+            Expr::new_tree(
+                Expr::Leaf(Value::Int(6)),
+                Op::Add,
+                Expr::Leaf(Value::Int(2)),
             ),
         );
 

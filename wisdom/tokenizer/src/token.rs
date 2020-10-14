@@ -32,6 +32,8 @@ pub enum TokenKind {
     Div,
     Equals,
     SemiColon,
+    LeftParen,
+    RightParen,
 }
 
 impl TokenKind {

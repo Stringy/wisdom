@@ -33,7 +33,7 @@ impl TokenStream {
     pub fn skip_whitespace(&mut self) {
         let mut tok = self.peek();
         while tok.is_some() && tok.unwrap().kind == TokenKind::Whitespace {
-            self.next();
+            self.consume();
             tok = self.peek();
         }
     }
@@ -53,7 +53,7 @@ impl TokenStream {
     pub fn expect_any(&mut self, kinds: &[TokenKind]) -> Option<Token> {
         let tok = self.peek()?;
         if kinds.contains(&tok.kind) {
-            self.next()
+            self.consume()
         } else {
             None
         }
@@ -96,7 +96,7 @@ impl TokenStream {
     /// // prove that peek returns the same token
     /// assert_eq!(tokens.peek(), tok);
     /// // and that next also consumes that token
-    /// assert_eq!(tokens.next(), tok);
+    /// assert_eq!(tokens.consume(), tok);
     /// ```
     ///
     pub fn peek(&mut self) -> Option<Token> {
@@ -118,12 +118,12 @@ impl TokenStream {
     /// use tokenizer::TokenKind::*;
     ///
     /// let mut tokens = TokenStream::new("1+2");
-    /// assert_eq!(tokens.next().unwrap().kind, Number);
-    /// assert_eq!(tokens.next().unwrap().kind, Add);
-    /// assert_eq!(tokens.next().unwrap().kind, Number);
+    /// assert_eq!(tokens.consume().unwrap().kind, Number);
+    /// assert_eq!(tokens.consume().unwrap().kind, Add);
+    /// assert_eq!(tokens.consume().unwrap().kind, Number);
     /// ```
     ///
-    pub fn next(&mut self) -> Option<Token> {
+    pub fn consume(&mut self) -> Option<Token> {
         // if we've peeked, return that
         if self.prev.is_some() {
             let tok = self.prev.clone();
