@@ -33,8 +33,8 @@ Current Roadmap:
 
 - [x] Simple maths expressions
 - [x] Recursive expressions
-- [ ] Variables, bindings, and their inclusion in expressions.
+- [x] Variables, bindings, and their inclusion in expressions.
+- [ ] Statements
 - [ ] Expand expressions, inc boolean operations.
-- [ ] Statements, if, else if, else, etc
 - [ ] Functions
 - [ ] World domination

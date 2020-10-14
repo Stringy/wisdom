@@ -5,6 +5,7 @@ use tokenizer::TokenKind;
 use crate::error::{Error, ErrorKind};
 use crate::error::ErrorKind::*;
 
+#[derive(PartialOrd, PartialEq, Debug)]
 pub struct Binding {
     name: String,
     value: Expr,
@@ -13,26 +14,40 @@ pub struct Binding {
 impl FromTokens for Binding {
     type Error = Error;
 
-    fn from_tokens(iter: &mut TokenStream) -> Result<Self, Self::Error> {
-        let let_ident = iter.expect(TokenKind::Identifier).ok_or(Error::from(InvalidToken))?;
+    fn from_tokens(tokens: &mut TokenStream) -> Result<Self, Self::Error> {
+        let let_ident = tokens.expect(TokenKind::Identifier).ok_or(Error::from(InvalidToken))?;
         if let_ident.literal != "let" {
             return Err(InvalidToken.into());
         }
-        iter.skip_whitespace();
 
-        let name_ident = iter.expect(TokenKind::Identifier).ok_or(Error::from(InvalidToken))?;
+        let name_ident = tokens.expect_ignore_ws(TokenKind::Identifier).ok_or(Error::from(InvalidToken))?;
+        tokens.expect_ignore_ws(TokenKind::Equals).ok_or(Error::from(InvalidToken))?;
 
-        iter.skip_whitespace();
+        tokens.skip_whitespace();
 
-        let _ = iter.expect(TokenKind::Equals).ok_or(Error::from(InvalidToken))?;
-
-        iter.skip_whitespace();
-
-        let expr = Expr::from_tokens(iter)?;
+        let expr = Expr::from_tokens(tokens)?;
 
         Ok(Self {
             name: name_ident.literal.clone(),
             value: expr,
         })
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::value::Value;
+
+    #[test]
+    fn test_simple_binding() {
+        let mut tokens = TokenStream::new("let foo = 1;");
+        let bind = Binding::from_tokens(&mut tokens).unwrap();
+        let expected = Binding {
+            name: "foo".to_string(),
+            value: Expr::Leaf(Value::Int(1)),
+        };
+
+        assert_eq!(bind, expected);
     }
 }
