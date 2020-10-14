@@ -8,6 +8,8 @@ use crate::value::Value;
 use std::collections::VecDeque;
 
 use crate::ext::*;
+use crate::error::{Error, ErrorKind};
+use crate::error::ErrorKind::InvalidToken;
 
 // pub struct Expr {
 //     kind: ExprKind<Number>,
@@ -31,7 +33,7 @@ impl Expr {
 }
 
 impl FromTokens for Expr {
-    type Error = ();
+    type Error = Error;
 
     fn from_tokens(tokens: &mut TokenStream) -> Result<Self, Self::Error> {
         let mut operators: VecDeque<Op> = VecDeque::new();
@@ -51,7 +53,7 @@ impl FromTokens for Expr {
                             operators.push_back(op);
                         } else {
                             // construct a tree
-                            let (rhs, lhs) = operands.pop_back_two().ok_or(())?;
+                            let (rhs, lhs) = operands.pop_back_two().ok_or(Error::from(InvalidToken))?;
                             operands.push_back(Expr::new_tree(lhs, op, rhs));
                         }
                     } else {
@@ -64,7 +66,7 @@ impl FromTokens for Expr {
                     operands.push_back(Expr::Leaf(Value::from_tokens(tokens)?));
                 }
                 TokenKind::SemiColon => break,
-                _ => return Err(())
+                _ => return Err(Error::from(ErrorKind::InvalidToken))
             }
 
             tokens.next();
@@ -72,13 +74,13 @@ impl FromTokens for Expr {
         }
 
         while operators.len() > 0 {
-            let op = operators.pop_back().ok_or(())?;
-            let (rhs, lhs) = operands.pop_back_two().ok_or(())?;
+            let op = operators.pop_back().ok_or(Error::from(InvalidToken))?;
+            let (rhs, lhs) = operands.pop_back_two().ok_or(Error::from(InvalidToken))?;
             let tree = Expr::new_tree(lhs, op, rhs);
             operands.push_back(tree);
         }
 
-        Ok(operands.pop_back().ok_or(())?)
+        Ok(operands.pop_back().ok_or(Error::from(InvalidToken))?)
     }
 }
 

@@ -1,5 +1,6 @@
 use std::collections::VecDeque;
 use crate::cursor::tokenize;
+use crate::Position;
 
 ///
 /// A Token defines a distinct entity within an input
@@ -13,15 +14,15 @@ use crate::cursor::tokenize;
 pub struct Token {
     pub kind: TokenKind,
     pub literal: String,
+    pub position: Position,
 }
 
 ///
 /// A TokenKind defines a type of token, and assigns the meaning
 /// behind the literal text.
 ///
-#[derive(Debug, PartialOrd, PartialEq, Clone)]
+#[derive(Debug, PartialOrd, PartialEq, Copy, Clone)]
 pub enum TokenKind {
-    Invalid,
     Identifier,
     Whitespace,
     Number,
@@ -53,6 +54,6 @@ mod test {
     #[test]
     fn test_is_operator() {
         assert!(TokenKind::Add.is_operator());
-        assert!(!TokenKind::Invalid.is_operator());
+        assert!(!TokenKind::Number.is_operator());
     }
 }

@@ -37,7 +37,7 @@ fn main() {
             if tok.kind == TokenKind::Identifier && tok.literal == "let" {
                 let bind = match Binding::from_tokens(&mut tokens) {
                     Ok(b) => b,
-                    Err(()) => {
+                    Err(_) => {
                         do_write("invalid variable binding\n");
                         continue;
                     }

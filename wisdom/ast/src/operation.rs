@@ -2,6 +2,8 @@ use std::fmt::{self, Display, Formatter};
 use std::str::FromStr;
 
 use tokenizer::{TokenKind, FromTokens, TokenStream};
+use crate::error::Error;
+use crate::error::ErrorKind::InvalidToken;
 
 #[derive(Debug, PartialOrd, PartialEq, Copy, Clone)]
 pub enum Op {
@@ -47,13 +49,13 @@ impl FromStr for Op {
 }
 
 impl FromTokens for Op {
-    type Error = ();
+    type Error = Error;
 
     fn from_tokens(iter: &mut TokenStream) -> Result<Self, Self::Error> {
         let tok = iter.expect_any(&[
             TokenKind::Add, TokenKind::Sub, TokenKind::Mul, TokenKind::Div]
-        ).ok_or(())?;
-        Self::from_str(tok.literal.as_str())
+        ).ok_or(InvalidToken)?;
+        Self::from_str(tok.literal.as_str()).map_err(|_| InvalidToken.into())
     }
 }
 

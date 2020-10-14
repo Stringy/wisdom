@@ -2,6 +2,8 @@ use tokenizer::{FromTokens, TokenStream};
 use std::str::FromStr;
 use std::ops::Add;
 use std::borrow::Borrow;
+use crate::error::Error;
+use crate::error::ErrorKind::UnexpectedEOL;
 
 #[derive(Clone, Debug, PartialOrd, PartialEq)]
 pub enum Value {
@@ -12,7 +14,7 @@ pub enum Value {
 }
 
 impl FromTokens for Value {
-    type Error = ();
+    type Error = Error;
 
     fn from_tokens(tokens: &mut TokenStream) -> Result<Self, Self::Error> {
         let tok = tokens.peek();
@@ -26,7 +28,7 @@ impl FromTokens for Value {
                 _ => unimplemented!()
             }
         } else {
-            Err(())
+            Err(UnexpectedEOL.into())
         }
     }
 }

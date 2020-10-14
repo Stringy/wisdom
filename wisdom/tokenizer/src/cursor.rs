@@ -3,6 +3,7 @@ use std::iter::Peekable;
 
 use crate::token::{Token, TokenKind};
 use std::collections::VecDeque;
+use crate::Position;
 
 ///
 /// A Cursor is responsible for breaking up an input
@@ -21,6 +22,8 @@ pub struct Cursor<'a> {
     /// All chars consumed from self.chars
     /// reset after each token consumed
     consumed: Vec<char>,
+    /// Current position in the source code
+    position: Position,
 }
 
 impl<'a> Cursor<'a> {
@@ -34,6 +37,7 @@ impl<'a> Cursor<'a> {
             idx: 0,
             chars: input.chars(),
             consumed: Vec::new(),
+            position: Default::default(),
         }
     }
 
@@ -67,6 +71,11 @@ impl<'a> Cursor<'a> {
         if let Some(ch) = self.chars.next() {
             self.idx += 1;
             self.consumed.push(ch);
+            self.position.column += 1;
+            if ch == '\n' {
+                self.position.line += 1;
+                self.position.column = 1;
+            }
             Some(ch)
         } else {
             None
@@ -112,6 +121,8 @@ impl Cursor<'_> {
 
         self.prev = self.idx;
 
+        let saved_position = self.position.clone();
+
         let ch = self.next().unwrap_or('\0');
         let kind = match ch {
             ch if ch.is_whitespace() => {
@@ -143,6 +154,7 @@ impl Cursor<'_> {
         let token = Token {
             kind,
             literal: self.consumed.iter().collect(),
+            position: saved_position,
         };
         self.consumed.clear();
         token
@@ -227,11 +239,11 @@ mod test {
     fn test_cursor_simple() {
         let tokens = tokenize("1 + 1").collect::<Vec<Token>>();
         let expected = vec![
-            Token { kind: TokenKind::Number, literal: "1".to_string() },
-            Token { kind: TokenKind::Whitespace, literal: " ".to_string() },
-            Token { kind: TokenKind::Add, literal: "+".to_string() },
-            Token { kind: TokenKind::Whitespace, literal: " ".to_string() },
-            Token { kind: TokenKind::Number, literal: "1".to_string() },
+            Token { kind: TokenKind::Number, literal: "1".to_string(), position: Position { line: 1, column: 1 } },
+            Token { kind: TokenKind::Whitespace, literal: " ".to_string(), position: Position { line: 1, column: 2 } },
+            Token { kind: TokenKind::Add, literal: "+".to_string(), position: Position { line: 1, column: 3 } },
+            Token { kind: TokenKind::Whitespace, literal: " ".to_string(), position: Position { line: 1, column: 4 } },
+            Token { kind: TokenKind::Number, literal: "1".to_string(), position: Position { line: 1, column: 5 } },
         ];
 
         assert_eq!(&tokens[..], &expected[..]);
@@ -241,7 +253,7 @@ mod test {
     fn test_cursor_ident() {
         let tokens: Vec<Token> = tokenize("identifier").collect();
         let expected = vec![
-            Token { kind: TokenKind::Identifier, literal: "identifier".to_string() }
+            Token { kind: TokenKind::Identifier, literal: "identifier".to_string(), position: Position { line: 1, column: 1 } }
         ];
 
         assert_eq!(&tokens[..], &expected[..]);

@@ -80,10 +80,18 @@ impl TokenStream {
     /// Look ahead at the next `Token` without consuming it.
     ///
     /// ```
-    /// use tokenizer::{TokenStream, Token, TokenKind};
+    /// use tokenizer::{TokenStream, Token, TokenKind, Position};
     ///
     /// let mut tokens = TokenStream::new("1+1");
-    /// let tok = Some(Token { kind: TokenKind::Number, literal: "1".to_string()});
+    /// let tok = Some(Token {
+    ///     kind: TokenKind::Number,
+    ///     literal: "1".to_string(),
+    ///     position: Position {
+    ///         line: 1,
+    ///         column: 1
+    ///     }
+    /// });
+    ///
     /// assert_eq!(tokens.peek(), tok);
     /// // prove that peek returns the same token
     /// assert_eq!(tokens.peek(), tok);
@@ -110,9 +118,9 @@ impl TokenStream {
     /// use tokenizer::TokenKind::*;
     ///
     /// let mut tokens = TokenStream::new("1+2");
-    /// assert_eq!(tokens.next(), Some(Token { kind: Number, literal: "1".to_string()}));
-    /// assert_eq!(tokens.next(), Some(Token { kind: Add, literal: "+".to_string()}));
-    /// assert_eq!(tokens.next(), Some(Token { kind: Number, literal: "2".to_string()}));
+    /// assert_eq!(tokens.next().unwrap().kind, Number);
+    /// assert_eq!(tokens.next().unwrap().kind, Add);
+    /// assert_eq!(tokens.next().unwrap().kind, Number);
     /// ```
     ///
     pub fn next(&mut self) -> Option<Token> {
