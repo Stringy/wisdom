@@ -11,11 +11,6 @@ use crate::ext::*;
 use crate::error::{Error, ErrorKind};
 use crate::error::ErrorKind::InvalidToken;
 
-// pub struct Expr {
-//     kind: ExprKind<Number>,
-// }
-
-
 #[derive(Debug, PartialOrd, PartialEq)]
 pub enum Expr {
     Leaf(Value),
@@ -87,12 +82,6 @@ impl FromTokens for Expr {
         }
 
         Ok(operands.pop_back().ok_or(Error::from(InvalidToken))?)
-    }
-}
-
-impl Expr {
-    pub fn execute(self) -> Result<Value, ()> {
-        Err(())
     }
 }
 

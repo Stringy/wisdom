@@ -118,6 +118,7 @@ impl Cursor<'_> {
     ///
     pub fn next_token(&mut self) -> Token {
         use crate::token::TokenKind::*;
+        use crate::token::BinOpKind::*;
 
         self.prev = self.idx;
 
@@ -140,12 +141,22 @@ impl Cursor<'_> {
                 Identifier
             }
 
+            '>' => self.expect_equals(GtEq, Gt),
+            '<' => self.expect_equals(LtEq, Lt),
+
             // Handle all the single-character tokens
             '+' => Add,
             '-' => Sub,
             '*' => Mul,
             '/' => Div,
-            '=' => Equals,
+
+            '=' => self.expect_equals(EqEq, Eq),
+            '|' => self.expect_next('|', BinOp(Or), OrOr),
+            '&' => self.expect_next('&', BinOp(And), AndAnd),
+            '^' => BinOp(Xor),
+            '!' => self.expect_equals(NotEq, BinOp(Not)),
+            '%' => BinOp(Mod),
+
             ';' => SemiColon,
             '(' => LeftParen,
             ')' => RightParen,
@@ -160,6 +171,20 @@ impl Cursor<'_> {
         };
         self.consumed.clear();
         token
+    }
+
+    fn expect_equals(&mut self, is_expected: TokenKind, is_unexpected: TokenKind) -> TokenKind {
+        self.expect_next('=', is_expected, is_unexpected)
+    }
+
+    fn expect_next(&mut self, expected: char, is_expected: TokenKind, is_unexpected: TokenKind) -> TokenKind {
+        match self.first() {
+            c if c == expected => {
+                self.next();
+                is_expected
+            },
+            _ => is_unexpected
+        }
     }
 
     ///

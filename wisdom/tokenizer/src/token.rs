@@ -30,10 +30,30 @@ pub enum TokenKind {
     Sub,
     Mul,
     Div,
-    Equals,
+    Eq,
     SemiColon,
     LeftParen,
     RightParen,
+    Lt,
+    LtEq,
+    Gt,
+    GtEq,
+    AndAnd,
+    OrOr,
+    EqEq,
+    NotEq,
+    BinOp(BinOpKind),
+}
+
+#[derive(Debug, PartialOrd, PartialEq, Copy, Clone)]
+pub enum BinOpKind {
+    And,
+    Or,
+    Xor,
+    Not,
+    Mod,
+    ShiftLeft,
+    ShiftRight,
 }
 
 impl TokenKind {

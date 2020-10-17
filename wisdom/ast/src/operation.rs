@@ -11,13 +11,32 @@ pub enum Op {
     Sub,
     Mul,
     Div,
+    EqEq,
+    NotEq,
+    LtEq,
+    GtEq,
+    Lt,
+    Gt,
+    And,
+    Or,
+    Xor,
+    BinAnd,
+    BinOr,
 }
 
 impl Op {
     pub fn precendence(self) -> usize {
         match self {
             Op::Add | Op::Sub => 3,
-            Op::Mul | Op::Div => 4
+            Op::Mul | Op::Div => 4,
+            Op::Lt | Op::LtEq |
+            Op::Gt | Op::GtEq => 9,
+            Op::EqEq | Op::NotEq => 10,
+            Op::BinAnd => 11,
+            Op::Xor => 12,
+            Op::BinOr => 13,
+            Op::And => 14,
+            Op::Or => 15,
         }
     }
 }
@@ -28,7 +47,18 @@ impl Display for Op {
             Op::Add => write!(f, "+")?,
             Op::Sub => write!(f, "-")?,
             Op::Mul => write!(f, "*")?,
-            Op::Div => write!(f, "/")?
+            Op::Div => write!(f, "/")?,
+            Op::EqEq => write!(f, "==")?,
+            Op::NotEq => write!(f, "!=")?,
+            Op::LtEq => write!(f, "<=")?,
+            Op::GtEq => write!(f, ">=")?,
+            Op::Lt => write!(f, "<")?,
+            Op::Gt => write!(f, ">")?,
+            Op::And => write!(f, "&&")?,
+            Op::Or => write!(f, "||")?,
+            Op::Xor => write!(f, "^")?,
+            Op::BinAnd => write!(f, "&")?,
+            Op::BinOr => write!(f, "|")?,
         };
         Ok(())
     }
@@ -38,13 +68,24 @@ impl FromStr for Op {
     type Err = ();
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "+" => Ok(Self::Add),
-            "-" => Ok(Self::Sub),
-            "*" => Ok(Self::Mul),
-            "/" => Ok(Self::Div),
-            _ => Err(())
-        }
+        Ok(match s {
+            "+" => Self::Add,
+            "-" => Self::Sub,
+            "*" => Self::Mul,
+            "/" => Self::Div,
+            "==" => Self::EqEq,
+            "!=" => Self::NotEq,
+            "<=" => Self::LtEq,
+            ">=" => Self::GtEq,
+            "<" => Self::Lt,
+            ">" => Self::Gt,
+            "&&" => Self::And,
+            "||" => Self::Or,
+            "^" => Self::Xor,
+            "&" => Self::BinAnd,
+            "|" => Self::BinOr,
+            _ => return Err(())
+        })
     }
 }
 
@@ -53,8 +94,8 @@ impl FromTokens for Op {
 
     fn from_tokens(iter: &mut TokenStream) -> Result<Self, Self::Error> {
         let tok = iter.expect_any(&[
-            TokenKind::Add, TokenKind::Sub, TokenKind::Mul, TokenKind::Div]
-        ).ok_or(InvalidToken)?;
+            TokenKind::Add, TokenKind::Sub, TokenKind::Mul, TokenKind::Div,
+        ]).ok_or(InvalidToken)?;
         Self::from_str(tok.literal.as_str()).map_err(|_| InvalidToken.into())
     }
 }
