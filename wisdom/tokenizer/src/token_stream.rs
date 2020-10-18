@@ -11,9 +11,12 @@ pub struct TokenStream {
     /// The tokens themselves. VecDeque, so they can be popped
     /// from the front rather than the back.
     tokens: VecDeque<Token>,
-    /// Store an optional previous token, to allow peeking
+    /// Store an optional first (next) token, to allow peeking
     /// ahead.
-    prev: Option<Token>,
+    _first: Option<Token>,
+    /// Store an optional second token, to allow peeking
+    /// ahead.
+    _second: Option<Token>,
 }
 
 impl TokenStream {
@@ -22,9 +25,26 @@ impl TokenStream {
     ///
     pub fn new(input: &str) -> Self {
         Self {
-            tokens: tokenize(input).collect(),
-            prev: None,
+            tokens: tokenize(input, false).collect(),
+            _first: None,
+            _second: None,
         }
+    }
+
+    pub fn first(&mut self) -> Option<Token> {
+        if self._first.is_none() {
+            self._first = self.tokens.get(0).cloned()
+        }
+
+        self._first.clone()
+    }
+
+    pub fn second(&mut self) -> Option<Token> {
+        if self._second.is_none() {
+            self._second = self.tokens.get(1).cloned();
+        }
+
+        self._second.clone()
     }
 
     ///
@@ -53,6 +73,15 @@ impl TokenStream {
     pub fn expect_any(&mut self, kinds: &[TokenKind]) -> Option<Token> {
         let tok = self.peek()?;
         if kinds.contains(&tok.kind) {
+            self.consume()
+        } else {
+            None
+        }
+    }
+
+    pub fn expect_fn<F: FnOnce(TokenKind) -> bool>(&mut self, func: F) -> Option<Token> {
+        let tok = self.peek()?;
+        if func(tok.kind) {
             self.consume()
         } else {
             None
@@ -100,14 +129,7 @@ impl TokenStream {
     /// ```
     ///
     pub fn peek(&mut self) -> Option<Token> {
-        // if we've recently peeked, just return that
-        // otherwise get the next and keep it.
-        if self.prev.is_none() {
-            // Strictly speaking we're consuming from the vector,
-            // but we keep the token for the next call to next
-            self.prev = self.tokens.pop_front();
-        }
-        self.prev.clone()
+        self.first()
     }
 
     ///
@@ -124,17 +146,10 @@ impl TokenStream {
     /// ```
     ///
     pub fn consume(&mut self) -> Option<Token> {
-        // if we've peeked, return that
-        if self.prev.is_some() {
-            let tok = self.prev.clone();
-            // reset prev so peeking works
-            self.prev = None;
-            tok
-        } else {
-            // we haven't stored anything so return the front of the
-            // list
-            self.tokens.pop_front()
-        }
+        let tok = self.tokens.pop_front();
+        self._first = None;
+        self._second = None;
+        tok
     }
 }
 

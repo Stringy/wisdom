@@ -62,10 +62,17 @@ impl TokenKind {
     /// otherwise returns false.
     ///
     pub fn is_operator(&self) -> bool {
-        *self == TokenKind::Add ||
-            *self == TokenKind::Sub ||
-            *self == TokenKind::Mul ||
-            *self == TokenKind::Div
+        use TokenKind::*;
+        match *self {
+            Add | Sub | Mul | Div |
+            Lt | LtEq |
+            Gt | GtEq |
+            AndAnd | OrOr | EqEq | NotEq |
+            BinOp(..) => {
+                true
+            }
+            _ => false
+        }
     }
 }
 

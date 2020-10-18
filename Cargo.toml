@@ -3,5 +3,6 @@ members = [
     "welp",
     "wisdom",
     "wisdom/ast",
-    "wisdom/tokenizer"
+    "wisdom/tokenizer",
+    "wisdom/interpreter"
 ]

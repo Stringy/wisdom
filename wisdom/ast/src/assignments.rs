@@ -7,8 +7,8 @@ use crate::error::ErrorKind::*;
 
 #[derive(PartialOrd, PartialEq, Debug)]
 pub struct Assign {
-    name: String,
-    value: Expr,
+    pub name: String,
+    pub value: Expr,
 }
 
 impl FromTokens for Assign {

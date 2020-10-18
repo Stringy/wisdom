@@ -1,5 +1,4 @@
 mod traits;
-mod interp;
 
 use std::fs::File;
 
@@ -10,9 +9,7 @@ use lazy_static::lazy_static;
 
 use std::io::{BufReader, Write};
 
-use wisdom::tokenizer::{TokenKind, TokenStream, FromTokens};
-use wisdom::ast::assignments::Binding;
-use wisdom::ast::expr::Expr;
+use wisdom::interpreter::Interpreter;
 
 fn do_write(msg: &str) {
     std::io::stdout().write(msg.as_bytes()).unwrap();
@@ -26,29 +23,18 @@ fn get_input() -> String {
 }
 
 fn main() {
+    let mut interp = Interpreter::new();
     loop {
         do_write(">>> ");
         let line = get_input();
-        let mut tokens = TokenStream::new(line.as_str());
 
-        tokens.skip_whitespace();
+        if line == "\n" {
+            continue;
+        }
 
-        if let Some(tok) = tokens.peek() {
-            if tok.kind == TokenKind::Identifier && tok.literal == "let" {
-                let bind = match Binding::from_tokens(&mut tokens) {
-                    Ok(b) => b,
-                    Err(_) => {
-                        do_write("invalid variable binding\n");
-                        continue;
-                    }
-                };
-            } else {
-                let expr = Expr::from_tokens(&mut tokens);
-                match expr {
-                    Ok(expr) => do_write(format!("{:?}\n", expr).as_str()),
-                    Err(_) => do_write("Invalid input\n")
-                }
-            }
+        match interp.eval_line(line.as_str()) {
+            Ok(v) => do_write(format!("{}\n", v).as_str()),
+            Err(_) => do_write("failed\n")
         }
     }
 }

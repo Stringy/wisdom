@@ -66,11 +66,13 @@ impl FromTokens for Expr {
                 TokenKind::Number | TokenKind::Identifier => {
                     operands.push_back(Expr::Leaf(Value::from_tokens(tokens)?));
                 }
-                TokenKind::SemiColon | TokenKind::RightParen => break,
+                TokenKind::SemiColon | TokenKind::RightParen => {
+                    tokens.consume();
+                    break;
+                }
                 _ => return Err(Error::from(ErrorKind::InvalidToken))
             }
 
-            tokens.consume();
             peeked = tokens.peek();
         }
 
@@ -91,9 +93,9 @@ mod test {
 
     #[test]
     fn test_expr_simple() {
-        let mut tokens = TokenStream::new("1 + 1");
+        let mut tokens = TokenStream::new("1 + 2");
         let expr = Expr::from_tokens(&mut tokens).unwrap();
-        let (leaf_a, leaf_b) = (Expr::new_leaf(Value::Int(1)), Expr::new_leaf(Value::Int(1)));
+        let (leaf_a, leaf_b) = (Expr::new_leaf(Value::Int(1)), Expr::new_leaf(Value::Int(2)));
         let expected = Expr::new_tree(leaf_a, Op::Add, leaf_b);
 
         assert_eq!(expr, expected);

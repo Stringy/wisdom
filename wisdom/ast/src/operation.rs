@@ -93,9 +93,7 @@ impl FromTokens for Op {
     type Error = Error;
 
     fn from_tokens(iter: &mut TokenStream) -> Result<Self, Self::Error> {
-        let tok = iter.expect_any(&[
-            TokenKind::Add, TokenKind::Sub, TokenKind::Mul, TokenKind::Div,
-        ]).ok_or(InvalidToken)?;
+        let tok = iter.expect_fn(|k| k.is_operator()).ok_or(InvalidToken)?;
         Self::from_str(tok.literal.as_str()).map_err(|_| InvalidToken.into())
     }
 }

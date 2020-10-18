@@ -24,13 +24,15 @@ pub struct Cursor<'a> {
     consumed: Vec<char>,
     /// Current position in the source code
     position: Position,
+    /// Whether or not to emit Whitespace tokens
+    emit_whitespace: bool,
 }
 
 impl<'a> Cursor<'a> {
     ///
     /// Constructs a new Cursor from the input string.
     ///
-    pub fn new(input: &'a str) -> Self {
+    pub fn new(input: &'a str, emit_whitespace: bool) -> Self {
         Self {
             size: input.len(),
             prev: 0,
@@ -38,6 +40,7 @@ impl<'a> Cursor<'a> {
             chars: input.chars(),
             consumed: Vec::new(),
             position: Default::default(),
+            emit_whitespace,
         }
     }
 
@@ -59,7 +62,7 @@ impl<'a> Cursor<'a> {
     ///
     ///
     pub fn is_eof(&self) -> bool {
-        self.chars.as_str().is_empty()
+        self.chars.as_str().is_empty() || (!self.emit_whitespace && self.chars.clone().all(|c| c.is_whitespace()))
     }
 
     ///
@@ -110,7 +113,7 @@ impl Cursor<'_> {
     /// use tokenizer::Cursor;
     /// use tokenizer::TokenKind;
     ///
-    /// let mut cursor = Cursor::new("123");
+    /// let mut cursor = Cursor::new("123", false);
     /// let tok = cursor.next_token();
     /// assert_eq!(tok.kind, TokenKind::Number);
     /// assert_eq!(tok.literal.as_str(), "123");
@@ -120,6 +123,11 @@ impl Cursor<'_> {
         use crate::token::TokenKind::*;
         use crate::token::BinOpKind::*;
 
+        if !self.emit_whitespace {
+            self.consume_while(|c| c.is_whitespace());
+            self.consumed.clear();
+        }
+
         self.prev = self.idx;
 
         let saved_position = self.position.clone();
@@ -127,6 +135,8 @@ impl Cursor<'_> {
         let ch = self.next().unwrap_or('\0');
         let kind = match ch {
             ch if ch.is_whitespace() => {
+                // this won't be taken if we've consumed whitespace
+                // above, so this branch is only taken if self.emit_whitespace is false
                 self.consume_until(|c| !c.is_whitespace());
                 Whitespace
             }
@@ -151,8 +161,8 @@ impl Cursor<'_> {
             '/' => Div,
 
             '=' => self.expect_equals(EqEq, Eq),
-            '|' => self.expect_next('|', BinOp(Or), OrOr),
-            '&' => self.expect_next('&', BinOp(And), AndAnd),
+            '|' => self.expect_next('|', OrOr, BinOp(Or)),
+            '&' => self.expect_next('&', AndAnd, BinOp(And)),
             '^' => BinOp(Xor),
             '!' => self.expect_equals(NotEq, BinOp(Not)),
             '%' => BinOp(Mod),
@@ -182,7 +192,7 @@ impl Cursor<'_> {
             c if c == expected => {
                 self.next();
                 is_expected
-            },
+            }
             _ => is_unexpected
         }
     }
@@ -243,11 +253,11 @@ impl Cursor<'_> {
 ///
 /// ```
 /// use tokenizer::tokenize;
-/// assert_eq!(3, tokenize("1+2").collect::<Vec<_>>().len())
+/// assert_eq!(3, tokenize("1+2", false).collect::<Vec<_>>().len())
 /// ```
 ///
-pub fn tokenize(input: &str) -> impl Iterator<Item=Token> + '_ {
-    let mut c = Cursor::new(input);
+pub fn tokenize(input: &str, with_whitespace: bool) -> impl Iterator<Item=Token> + '_ {
+    let mut c = Cursor::new(input, with_whitespace);
     std::iter::from_fn(move || {
         if c.is_eof() {
             None
@@ -264,7 +274,7 @@ mod test {
 
     #[test]
     fn test_cursor_simple() {
-        let tokens = tokenize("1 + 1").collect::<Vec<Token>>();
+        let tokens = tokenize("1 + 1", true).collect::<Vec<Token>>();
         let expected = vec![
             Token { kind: TokenKind::Number, literal: "1".to_string(), position: Position { line: 1, column: 1 } },
             Token { kind: TokenKind::Whitespace, literal: " ".to_string(), position: Position { line: 1, column: 2 } },
@@ -278,7 +288,7 @@ mod test {
 
     #[test]
     fn test_cursor_ident() {
-        let tokens: Vec<Token> = tokenize("identifier").collect();
+        let tokens: Vec<Token> = tokenize("identifier", false).collect();
         let expected = vec![
             Token { kind: TokenKind::Identifier, literal: "identifier".to_string(), position: Position { line: 1, column: 1 } }
         ];
