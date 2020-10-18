@@ -186,17 +186,20 @@ impl Cursor<'_> {
         match self.first() {
             'x' => {
                 self.next();
+                self.consumed.clear();
                 self.consume_while(|c| c.is_ascii_hexdigit());
                 TokenKind::Literal { kind: LiteralKind::Int { base: Base::Hex } }
             }
             'b' => {
                 self.next();
+                self.consumed.clear();
                 self.consume_while(|c| c == '0' || c == '1');
                 TokenKind::Literal { kind: LiteralKind::Int { base: Base::Bin } }
             }
             'o' => {
                 self.next();
-                self.consume_while(|c| c > '0' && c < '7');
+                self.consumed.clear();
+                self.consume_while(|c| c > '0' && c < '8');
                 TokenKind::Literal { kind: LiteralKind::Int { base: Base::Oct } }
             }
             _ => {
@@ -327,9 +330,9 @@ mod test {
 
     #[test]
     fn test_number_hex() {
-        let tokens = tokenize("0x123", false).collect::<Vec<Token>>();
+        let tokens = tokenize("0x1a3", false).collect::<Vec<Token>>();
         let expected = vec![
-            Token { kind: TokenKind::Literal { kind: LiteralKind::Int { base: Base::Hex } }, literal: "0x123".to_string(), position: Position { line: 1, column: 1 } }
+            Token { kind: TokenKind::Literal { kind: LiteralKind::Int { base: Base::Hex } }, literal: "1a3".to_string(), position: Position { line: 1, column: 1 } }
         ];
         assert_eq!(tokens, expected);
     }
