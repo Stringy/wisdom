@@ -34,6 +34,8 @@ Current Roadmap:
 - [x] Simple maths expressions
 - [x] Recursive expressions
 - [x] Variables, bindings, and their inclusion in expressions.
+- [x] Expand literal kinds
+- [ ] String literals, including appropriate escapes
 - [ ] Statements
 - [ ] Expand expressions, inc boolean operations.
 - [ ] Functions
