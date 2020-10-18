@@ -31,7 +31,7 @@ impl Display for Value {
 impl FromTokens for Value {
     type Error = Error;
 
-    fn from_tokens(tokens: &mut TokenStream) -> Result<Self, Self::Error> {
+    fn from_tokens(tokens: &TokenStream) -> Result<Self, Self::Error> {
         let tok = tokens.peek();
         if let Some(tok) = tok {
             use tokenizer::TokenKind::*;

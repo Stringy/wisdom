@@ -1,5 +1,7 @@
 use std::collections::VecDeque;
 use crate::{Token, tokenize, TokenKind};
+use std::cell::RefCell;
+use crate::TokenKind::Whitespace;
 
 ///
 /// Defines a list of tokens, generated from an input string
@@ -10,7 +12,7 @@ use crate::{Token, tokenize, TokenKind};
 pub struct TokenStream {
     /// The tokens themselves. VecDeque, so they can be popped
     /// from the front rather than the back.
-    tokens: VecDeque<Token>,
+    tokens: RefCell<VecDeque<Token>>,
 }
 
 impl TokenStream {
@@ -19,32 +21,37 @@ impl TokenStream {
     ///
     pub fn new(input: &str) -> Self {
         Self {
-            tokens: tokenize(input, false).collect(),
+            tokens: RefCell::new(tokenize(input, false).collect::<VecDeque<Token>>()),
         }
     }
 
     ///
     /// Looks ahead at the next token, without consuming it.
     ///
-    pub fn first(&mut self) -> Option<Token> {
-        self.tokens.get(0).cloned()
+    pub fn first(&self) -> Option<Token> {
+        let tokens = self.tokens.borrow_mut();
+        tokens.get(0).cloned()
     }
 
     ///
     /// Looks ahead at the second next token, without consuming it.
     ///
-    pub fn second(&mut self) -> Option<Token> {
-        self.tokens.get(1).cloned()
+    pub fn second(&self) -> Option<Token> {
+        let tokens = self.tokens.borrow_mut();
+        tokens.get(1).cloned()
     }
 
     ///
     /// Seeks forward in the tokens until there is a non-whitespace token.
     ///
-    pub fn skip_whitespace(&mut self) {
-        let mut tok = self.peek();
-        while tok.is_some() && tok.unwrap().kind == TokenKind::Whitespace {
+    pub fn skip_whitespace(&self) {
+        let mut peeked = self.peek();
+        while let Some(tok) = &peeked {
+            if tok.kind != Whitespace {
+                break;
+            }
             self.consume();
-            tok = self.peek();
+            peeked = self.peek();
         }
     }
 
@@ -52,7 +59,7 @@ impl TokenStream {
     /// If the next token is of the provided TokenKind, return it, otherwise
     /// return None
     ///
-    pub fn expect(&mut self, kind: TokenKind) -> Option<Token> {
+    pub fn expect(&self, kind: TokenKind) -> Option<Token> {
         self.expect_any(&[kind])
     }
 
@@ -60,7 +67,7 @@ impl TokenStream {
     /// If the next token matches any of the provided TokenKinds, return it,
     /// otherwise return None
     ///
-    pub fn expect_any(&mut self, kinds: &[TokenKind]) -> Option<Token> {
+    pub fn expect_any(&self, kinds: &[TokenKind]) -> Option<Token> {
         let tok = self.peek()?;
         if kinds.contains(&tok.kind) {
             self.consume()
@@ -74,7 +81,7 @@ impl TokenStream {
     /// a closure. If that closure function returns true then we consume the token
     /// and return it, otherwise returns None
     ///
-    pub fn expect_fn<F: FnOnce(TokenKind) -> bool>(&mut self, func: F) -> Option<Token> {
+    pub fn expect_fn<F: FnOnce(TokenKind) -> bool>(&self, func: F) -> Option<Token> {
         let tok = self.peek()?;
         if func(tok.kind) {
             self.consume()
@@ -89,7 +96,7 @@ impl TokenStream {
     ///
     /// TODO: remove whitespace functions?
     ///
-    pub fn expect_ignore_ws(&mut self, kind: TokenKind) -> Option<Token> {
+    pub fn expect_ignore_ws(&self, kind: TokenKind) -> Option<Token> {
         self.expect_any_ignore_ws(&[kind])
     }
 
@@ -97,7 +104,7 @@ impl TokenStream {
     /// If the next non-whitespace `Token` matches any of the provided `TokenKind`s,
     /// return it, otherwise returns `None`
     ///
-    pub fn expect_any_ignore_ws(&mut self, kinds: &[TokenKind]) -> Option<Token> {
+    pub fn expect_any_ignore_ws(&self, kinds: &[TokenKind]) -> Option<Token> {
         self.skip_whitespace();
         self.expect_any(kinds)
     }
@@ -127,7 +134,7 @@ impl TokenStream {
     /// assert_eq!(tokens.consume(), tok);
     /// ```
     ///
-    pub fn peek(&mut self) -> Option<Token> {
+    pub fn peek(&self) -> Option<Token> {
         self.first()
     }
 
@@ -146,9 +153,9 @@ impl TokenStream {
     /// assert_eq!(tokens.consume().unwrap().kind, Literal { kind: Int { base: Dec }});
     /// ```
     ///
-    pub fn consume(&mut self) -> Option<Token> {
-        let tok = self.tokens.pop_front();
-        tok
+    pub fn consume(&self) -> Option<Token> {
+        let mut tokens = self.tokens.borrow_mut();
+        tokens.pop_front()
     }
 }
 
@@ -161,5 +168,5 @@ pub trait FromTokens: Sized {
     /// Construct Self from a list of Tokens. Intended as a way
     /// of recursively constructing AST nodes from a Tokens structure.
     ///
-    fn from_tokens(tokens: &mut TokenStream) -> Result<Self, Self::Error>;
+    fn from_tokens(tokens: &TokenStream) -> Result<Self, Self::Error>;
 }

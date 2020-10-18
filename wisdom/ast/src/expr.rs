@@ -27,7 +27,7 @@ impl Expr {
 impl FromTokens for Expr {
     type Error = Error;
 
-    fn from_tokens(tokens: &mut TokenStream) -> Result<Self, Self::Error> {
+    fn from_tokens(tokens: &TokenStream) -> Result<Self, Self::Error> {
         let mut operators: VecDeque<Op> = VecDeque::new();
         let mut operands: VecDeque<Expr> = VecDeque::new();
 
@@ -90,8 +90,8 @@ mod test {
 
     #[test]
     fn test_expr_simple() {
-        let mut tokens = TokenStream::new("1 + 2");
-        let expr = Expr::from_tokens(&mut tokens).unwrap();
+        let tokens = TokenStream::new("1 + 2");
+        let expr = Expr::from_tokens(&tokens).unwrap();
         let (leaf_a, leaf_b) = (Expr::new_leaf(Value::Int(1)), Expr::new_leaf(Value::Int(2)));
         let expected = Expr::new_tree(leaf_a, Op::Add, leaf_b);
 
@@ -100,8 +100,8 @@ mod test {
 
     #[test]
     fn test_expr_multi() {
-        let mut tokens = TokenStream::new("1 + 1 * 5");
-        let expr = Expr::from_tokens(&mut tokens).unwrap();
+        let tokens = TokenStream::new("1 + 1 * 5");
+        let expr = Expr::from_tokens(&tokens).unwrap();
         let expected = Expr::new_tree(
             Expr::new_leaf(Value::Int(1)), Op::Add, Expr::new_tree(
                 Expr::new_leaf(Value::Int(1)), Op::Mul, Expr::new_leaf(Value::Int(5)),
@@ -113,8 +113,8 @@ mod test {
 
     #[test]
     fn test_expr_parens() {
-        let mut tokens = TokenStream::new("(1 + 1) * 5");
-        let expr = Expr::from_tokens(&mut tokens).unwrap();
+        let tokens = TokenStream::new("(1 + 1) * 5");
+        let expr = Expr::from_tokens(&tokens).unwrap();
 
         let expected = Expr::new_tree(
             Expr::new_tree(Expr::Leaf(Value::Int(1)), Op::Add, Expr::Leaf(Value::Int(1))),
@@ -127,8 +127,8 @@ mod test {
 
     #[test]
     fn test_expr_complex() {
-        let mut tokens = TokenStream::new("(2 * (5 + 7)) * (6 + 2)");
-        let expr = Expr::from_tokens(&mut tokens).unwrap();
+        let tokens = TokenStream::new("(2 * (5 + 7)) * (6 + 2)");
+        let expr = Expr::from_tokens(&tokens).unwrap();
         let expected = Expr::new_tree(
             Expr::new_tree(
                 Expr::Leaf(Value::Int(2)),

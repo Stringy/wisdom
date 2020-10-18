@@ -26,7 +26,7 @@ impl FromStr for Int {
 impl FromTokens for Int {
     type Error = ();
 
-    fn from_tokens(iter: &mut TokenStream) -> Result<Self, Self::Error> {
+    fn from_tokens(iter: &TokenStream) -> Result<Self, Self::Error> {
         let tok = iter.peek().ok_or(())?;
         match tok.kind {
             TokenKind::Literal { kind: LiteralKind::Int { base } } => {

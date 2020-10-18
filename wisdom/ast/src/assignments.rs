@@ -13,7 +13,7 @@ pub struct Assign {
 impl FromTokens for Assign {
     type Error = Error;
 
-    fn from_tokens(tokens: &mut TokenStream) -> Result<Self, Self::Error> {
+    fn from_tokens(tokens: &TokenStream) -> Result<Self, Self::Error> {
         let name_ident = tokens.expect_ignore_ws(TokenKind::Identifier).ok_or(Error::from(InvalidToken))?;
         tokens.expect_ignore_ws(TokenKind::Eq).ok_or(Error::from(InvalidToken))?;
 
@@ -34,7 +34,7 @@ pub struct Binding(Assign);
 impl FromTokens for Binding {
     type Error = Error;
 
-    fn from_tokens(tokens: &mut TokenStream) -> Result<Self, Self::Error> {
+    fn from_tokens(tokens: &TokenStream) -> Result<Self, Self::Error> {
         let let_ident = tokens.expect(TokenKind::Identifier).ok_or(Error::from(InvalidToken))?;
         if let_ident.literal != "let" {
             return Err(InvalidToken.into());
@@ -59,8 +59,8 @@ mod test {
 
     #[test]
     fn test_simple_assign() {
-        let mut tokens = TokenStream::new("foo = 1;");
-        let assign = Assign::from_tokens(&mut tokens).unwrap();
+        let tokens = TokenStream::new("foo = 1;");
+        let assign = Assign::from_tokens(&tokens).unwrap();
         let expected = Assign {
             name: "foo".to_string(),
             value: Expr::Leaf(Value::Int(1)),
@@ -71,8 +71,8 @@ mod test {
 
     #[test]
     fn test_simple_binding() {
-        let mut tokens = TokenStream::new("let foo = 1;");
-        let bind = Binding::from_tokens(&mut tokens).unwrap();
+        let tokens = TokenStream::new("let foo = 1;");
+        let bind = Binding::from_tokens(&tokens).unwrap();
         let expected = Binding(Assign{
             name: "foo".to_string(),
             value: Expr::Leaf(Value::Int(1))
