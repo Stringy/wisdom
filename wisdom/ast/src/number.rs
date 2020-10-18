@@ -1,34 +1,44 @@
 use std::str::FromStr;
 use std::num::{ParseIntError};
 use std::fmt::{self, Display, Formatter};
-use tokenizer::{TokenKind, FromTokens, TokenStream};
+use tokenizer::{TokenKind, FromTokens, TokenStream, LiteralKind, Base};
 
 #[derive(Debug, PartialOrd, PartialEq)]
-pub struct Number(pub i64);
+pub struct Int(pub i64);
 
-impl Number {}
+impl Int {}
 
-impl Display for Number {
+impl Display for Int {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.0)
     }
 }
 
-impl FromStr for Number {
+impl FromStr for Int {
     type Err = ParseIntError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let inner = i64::from_str(s)?;
-        Ok(Number(inner))
+        Ok(Int(inner))
     }
 }
 
-impl FromTokens for Number {
+impl FromTokens for Int {
     type Error = ();
 
     fn from_tokens(iter: &mut TokenStream) -> Result<Self, Self::Error> {
-        let tok = iter.expect(TokenKind::Number).ok_or(())?;
-        Self::from_str(tok.literal.as_str()).map_err(|_| ())
+        let tok = iter.peek().ok_or(())?;
+        match tok.kind {
+            TokenKind::Literal { kind: LiteralKind::Int { base } } => {
+                Ok(match base {
+                    Base::Hex => Self(i64::from_str_radix(tok.literal.as_str(), 16).map_err(|_| ())?),
+                    Base::Bin => Self(i64::from_str_radix(tok.literal.as_str(), 2).map_err(|_| ())?),
+                    Base::Dec => Self(i64::from_str_radix(tok.literal.as_str(), 10).map_err(|_| ())?),
+                    Base::Oct => Self(i64::from_str_radix(tok.literal.as_str(), 8).map_err(|_| ())?),
+                })
+            }
+            _ => Err(())
+        }
     }
 }
 
@@ -38,7 +48,7 @@ mod test {
 
     #[test]
     fn test_number() {
-        let n: Number = Number::from_str("123").unwrap();
-        assert_eq!(n, Number(123));
+        let n: Int = Int::from_str("123").unwrap();
+        assert_eq!(n, Int(123));
     }
 }

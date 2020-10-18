@@ -1,5 +1,5 @@
 use crate::expr::Expr;
-use crate::number::Number;
+use crate::number::Int;
 use tokenizer::{FromTokens, TokenStream};
 use tokenizer::TokenKind;
 use crate::error::{Error, ErrorKind};

@@ -1,9 +1,9 @@
 use std::str::Chars;
 use std::iter::Peekable;
 
-use crate::token::{Token, TokenKind};
+use crate::token::{Token, TokenKind, LiteralKind};
 use std::collections::VecDeque;
-use crate::Position;
+use crate::{Position, Base};
 
 ///
 /// A Cursor is responsible for breaking up an input
@@ -142,8 +142,7 @@ impl Cursor<'_> {
             }
 
             ch if ch.is_numeric() => {
-                self.consume_until(|c| !c.is_numeric());
-                Number
+                self.parse_number_literal()
             }
 
             ch if self.is_ident_start(ch) => {
@@ -181,6 +180,33 @@ impl Cursor<'_> {
         };
         self.consumed.clear();
         token
+    }
+
+    fn parse_number_literal(&mut self) -> TokenKind {
+        match self.first() {
+            'x' => {
+                self.consume_while(|c| c.is_ascii_hexdigit());
+                TokenKind::Literal { kind: LiteralKind::Int { base: Base::Hex } }
+            }
+            'b' => {
+                self.consume_while(|c| c == '0' || c == '1');
+                TokenKind::Literal { kind: LiteralKind::Int { base: Base::Bin } }
+            }
+            'o' => {
+                self.consume_while(|c| c > '0' && c < '7');
+                TokenKind::Literal { kind: LiteralKind::Int { base: Base::Oct } }
+            }
+            _ => {
+                self.consume_while(|c| c.is_numeric());
+                if self.first() == '.' {
+                    self.next().unwrap(); // this is safe
+                    self.consume_while(|c| c.is_numeric());
+                    TokenKind::Literal { kind: LiteralKind::Float }
+                } else {
+                    TokenKind::Literal { kind: LiteralKind::Int { base: Base::Dec } }
+                }
+            }
+        }
     }
 
     fn expect_equals(&mut self, is_expected: TokenKind, is_unexpected: TokenKind) -> TokenKind {
@@ -276,11 +302,11 @@ mod test {
     fn test_cursor_simple() {
         let tokens = tokenize("1 + 1", true).collect::<Vec<Token>>();
         let expected = vec![
-            Token { kind: TokenKind::Number, literal: "1".to_string(), position: Position { line: 1, column: 1 } },
+            Token { kind: TokenKind::Literal { kind: LiteralKind::Int { base: Base::Dec } }, literal: "1".to_string(), position: Position { line: 1, column: 1 } },
             Token { kind: TokenKind::Whitespace, literal: " ".to_string(), position: Position { line: 1, column: 2 } },
             Token { kind: TokenKind::Add, literal: "+".to_string(), position: Position { line: 1, column: 3 } },
             Token { kind: TokenKind::Whitespace, literal: " ".to_string(), position: Position { line: 1, column: 4 } },
-            Token { kind: TokenKind::Number, literal: "1".to_string(), position: Position { line: 1, column: 5 } },
+            Token { kind: TokenKind::Literal { kind: LiteralKind::Int { base: Base::Dec } }, literal: "1".to_string(), position: Position { line: 1, column: 5 } },
         ];
 
         assert_eq!(&tokens[..], &expected[..]);

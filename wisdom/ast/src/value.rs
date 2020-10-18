@@ -2,7 +2,7 @@ use tokenizer::{FromTokens, TokenStream};
 use std::str::FromStr;
 use std::ops::Add;
 use std::borrow::Borrow;
-use crate::error::Error;
+use crate::error::{Error, ErrorKind};
 use crate::error::ErrorKind::UnexpectedEOL;
 use crate::operation::Op;
 use std::fmt::{Display, Formatter};
@@ -36,10 +36,24 @@ impl FromTokens for Value {
         let tok = tokens.peek();
         if let Some(tok) = tok {
             use tokenizer::TokenKind::*;
+            use tokenizer::LiteralKind::*;
+            use tokenizer::Base::*;
+
             match tok.kind {
-                Number => {
+                Literal { kind } => {
                     tokens.consume();
-                    Ok(Value::Int(i64::from_str(tok.literal.as_str()).unwrap()))
+                    match kind {
+                        Int { base } => {
+                            Ok(match base {
+                                Hex => Self::Int(i64::from_str_radix(tok.literal.as_str(), 16).map_err(|_| Error::from(ErrorKind::InvalidLit))?),
+                                Bin => Self::Int(i64::from_str_radix(tok.literal.as_str(), 2).map_err(|_| Error::from(ErrorKind::InvalidLit))?),
+                                Dec => Self::Int(i64::from_str_radix(tok.literal.as_str(), 10).map_err(|_| Error::from(ErrorKind::InvalidLit))?),
+                                Oct => Self::Int(i64::from_str_radix(tok.literal.as_str(), 8).map_err(|_| Error::from(ErrorKind::InvalidLit))?),
+                            })
+                        }
+                        Float => Ok(Self::Float(f64::from_str(tok.literal.as_str()).map_err(|_| Error::from(ErrorKind::InvalidLit))?)),
+                        String => Ok(Self::String(tok.literal.to_owned())),
+                    }
                 }
                 Identifier => {
                     tokens.consume();
@@ -145,7 +159,7 @@ impl Value {
     }
 
     pub fn is_equal(&self, rhs: &Value) -> bool {
-        self == rhs
+        *self == *rhs
     }
 
     pub fn is_lt(&self, rhs: &Value) -> bool {

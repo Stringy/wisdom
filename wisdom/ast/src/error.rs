@@ -25,6 +25,7 @@ pub enum ErrorKind {
     InvalidToken,
     Incomplete,
     UnexpectedEOL,
+    InvalidLit,
 }
 
 impl From<ErrorKind> for Error {

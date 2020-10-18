@@ -1,6 +1,6 @@
 use tokenizer::{FromTokens, TokenStream, TokenKind, Token};
 
-use crate::number::Number;
+use crate::number::Int;
 use crate::operation::Op;
 use std::str::FromStr;
 use std::ops::Add;
@@ -63,7 +63,7 @@ impl FromTokens for Expr {
                         operators.push_back(op);
                     }
                 }
-                TokenKind::Number | TokenKind::Identifier => {
+                TokenKind::Literal {..} | TokenKind::Identifier => {
                     operands.push_back(Expr::Leaf(Value::from_tokens(tokens)?));
                 }
                 TokenKind::SemiColon | TokenKind::RightParen => {

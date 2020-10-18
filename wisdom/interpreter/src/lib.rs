@@ -26,7 +26,7 @@ impl Interpreter {
         loop {
             return if let Some(tok) = tokens.first() {
                 match tok.kind {
-                    TokenKind::Number => {
+                    TokenKind::Literal{..} => {
                         let expr = Expr::from_tokens(&mut tokens).map_err(|_| ())?;
                         self.visit_expr(expr)
                     }

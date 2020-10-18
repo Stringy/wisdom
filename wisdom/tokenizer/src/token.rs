@@ -25,7 +25,9 @@ pub struct Token {
 pub enum TokenKind {
     Identifier,
     Whitespace,
-    Number,
+    Literal {
+        kind: LiteralKind,
+    },
     Add,
     Sub,
     Mul,
@@ -43,6 +45,23 @@ pub enum TokenKind {
     EqEq,
     NotEq,
     BinOp(BinOpKind),
+}
+
+#[derive(Debug, PartialOrd, PartialEq, Copy, Clone)]
+pub enum LiteralKind {
+    Int {
+        base: Base,
+    },
+    Float,
+    String,
+}
+
+#[derive(Debug, PartialOrd, PartialEq, Copy, Clone)]
+pub enum Base {
+    Hex,
+    Dec,
+    Bin,
+    Oct,
 }
 
 #[derive(Debug, PartialOrd, PartialEq, Copy, Clone)]
@@ -83,6 +102,6 @@ mod test {
     #[test]
     fn test_is_operator() {
         assert!(TokenKind::Add.is_operator());
-        assert!(!TokenKind::Number.is_operator());
+        assert!(!TokenKind::LeftParen.is_operator());
     }
 }
