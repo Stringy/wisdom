@@ -142,13 +142,15 @@ impl Cursor<'_> {
             }
 
             ch if ch.is_numeric() => {
-                self.parse_number_literal()
+                self.consume_number_literal()
             }
 
             ch if self.is_ident_start(ch) => {
                 self.consume_until(|c| !c.is_alphanumeric());
                 Identifier
             }
+
+            '"' => self.consume_string_literal(),
 
             '>' => self.expect_equals(GtEq, Gt),
             '<' => self.expect_equals(LtEq, Lt),
@@ -182,7 +184,35 @@ impl Cursor<'_> {
         token
     }
 
-    fn parse_number_literal(&mut self) -> TokenKind {
+    fn consume_string_literal(&mut self) -> TokenKind {
+        let mut escaped = false;
+        let mut c = self.first();
+        loop {
+            if match c {
+                '"' => {
+                    if escaped {
+                        escaped = false;
+                        false
+                    } else {
+                        true
+                    }
+                }
+                '\\' => {
+                    escaped = true;
+                    false
+                }
+                _ => false
+            } {
+                break;
+            }
+            self.next();
+            c = self.first();
+        }
+        self.next();
+        TokenKind::Literal { kind: LiteralKind::String }
+    }
+
+    fn consume_number_literal(&mut self) -> TokenKind {
         match self.first() {
             'x' => {
                 self.next();
