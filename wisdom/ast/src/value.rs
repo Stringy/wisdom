@@ -52,7 +52,10 @@ impl FromTokens for Value {
                             })
                         }
                         Float => Ok(Self::Float(f64::from_str(tok.literal.as_str()).map_err(|_| Error::from(ErrorKind::InvalidLit))?)),
-                        String => Ok(Self::String(tok.literal.to_owned())),
+                        String => Ok({
+                            let unescaped: std::string::String = tok.literal.chars().filter(|c| *c != '\\').collect();
+                            Self::String(unescaped[1..unescaped.len()-1].to_owned())
+                        })
                     }
                 }
                 Identifier => {
