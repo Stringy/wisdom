@@ -24,14 +24,16 @@ impl Interpreter {
     pub fn eval_line(&mut self, input: &str) -> Result<Value, ()> {
         let mut tokens = TokenStream::new(input);
         loop {
-            if let Some(tok) = tokens.first() {
+            return if let Some(tok) = tokens.first() {
                 match tok.kind {
                     TokenKind::Number => {
                         let expr = Expr::from_tokens(&mut tokens).map_err(|_| ())?;
-                        return self.visit_expr(expr);
+                        self.visit_expr(expr)
                     }
                     TokenKind::Identifier => {
-                        return if let Some(next) = tokens.second() {
+                        if tok.literal == "let" {
+                            self.visit_bind(Binding::from_tokens(&mut tokens).map_err(|_| ())?)
+                        } else if let Some(next) = tokens.second() {
                             match next.kind {
                                 _ if next.kind.is_operator() => {
                                     let expr = Expr::from_tokens(&mut tokens).map_err(|_| ())?;
@@ -44,25 +46,17 @@ impl Interpreter {
                                 _ => Err(())
                             }
                         } else {
-                            if self.globals.contains_key(tok.literal.as_str()) {
-                                let value = self.globals.get(tok.literal.as_str()).cloned();
-                                if let Some(value) = value {
-                                    Ok(value)
-                                } else {
-                                    Err(())
-                                }
-                            } else {
-                                Err(())
-                            }
-                        };
+                            let value = self.globals.get(tok.literal.as_str()).cloned();
+                            value.ok_or(())
+                        }
                     }
                     _ => {
-                        return Err(());
+                        Err(())
                     }
                 }
             } else {
-                return Err(());
-            }
+                Err(())
+            };
         }
     }
 

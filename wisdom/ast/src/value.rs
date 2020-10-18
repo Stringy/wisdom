@@ -128,7 +128,7 @@ impl Value {
         match self {
             Value::Int(n) => {
                 match rhs {
-                    Value::Int(m) => Ok(Value::Int(n / m)),
+                    Value::Int(m) => Ok(Value::Float(*n as f64 / *m as f64)),
                     Value::Float(m) => Ok(Value::Float(*n as f64 / m)),
                     _ => Err(())
                 }

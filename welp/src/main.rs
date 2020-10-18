@@ -24,6 +24,7 @@ fn get_input() -> String {
 
 fn main() {
     let mut interp = Interpreter::new();
+    do_write("Wisdom REPL (WELP) v1.0\n");
     loop {
         do_write(">>> ");
         let line = get_input();
