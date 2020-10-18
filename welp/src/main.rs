@@ -1,13 +1,6 @@
-mod traits;
-
-use std::fs::File;
-
-extern crate lazy_static;
 extern crate wisdom;
 
-use lazy_static::lazy_static;
-
-use std::io::{BufReader, Write};
+use std::io::Write;
 
 use wisdom::interpreter::Interpreter;
 
@@ -22,6 +15,7 @@ fn get_input() -> String {
     line
 }
 
+// TODO: support reading from file
 fn main() {
     let mut interp = Interpreter::new();
     do_write("Wisdom REPL (WELP) v1.0\n");

@@ -11,12 +11,6 @@ pub struct TokenStream {
     /// The tokens themselves. VecDeque, so they can be popped
     /// from the front rather than the back.
     tokens: VecDeque<Token>,
-    /// Store an optional first (next) token, to allow peeking
-    /// ahead.
-    _first: Option<Token>,
-    /// Store an optional second token, to allow peeking
-    /// ahead.
-    _second: Option<Token>,
 }
 
 impl TokenStream {
@@ -26,25 +20,21 @@ impl TokenStream {
     pub fn new(input: &str) -> Self {
         Self {
             tokens: tokenize(input, false).collect(),
-            _first: None,
-            _second: None,
         }
     }
 
+    ///
+    /// Looks ahead at the next token, without consuming it.
+    ///
     pub fn first(&mut self) -> Option<Token> {
-        if self._first.is_none() {
-            self._first = self.tokens.get(0).cloned()
-        }
-
-        self._first.clone()
+        self.tokens.get(0).cloned()
     }
 
+    ///
+    /// Looks ahead at the second next token, without consuming it.
+    ///
     pub fn second(&mut self) -> Option<Token> {
-        if self._second.is_none() {
-            self._second = self.tokens.get(1).cloned();
-        }
-
-        self._second.clone()
+        self.tokens.get(1).cloned()
     }
 
     ///
@@ -79,6 +69,11 @@ impl TokenStream {
         }
     }
 
+    ///
+    /// More flexible expect_* function that allows the caller to provide
+    /// a closure. If that closure function returns true then we consume the token
+    /// and return it, otherwise returns None
+    ///
     pub fn expect_fn<F: FnOnce(TokenKind) -> bool>(&mut self, func: F) -> Option<Token> {
         let tok = self.peek()?;
         if func(tok.kind) {
@@ -91,6 +86,8 @@ impl TokenStream {
     ///
     /// If the next non-whitespace `Token` matches the provided `TokenKind`, return it,
     /// otherwise returns `None`
+    ///
+    /// TODO: remove whitespace functions?
     ///
     pub fn expect_ignore_ws(&mut self, kind: TokenKind) -> Option<Token> {
         self.expect_any_ignore_ws(&[kind])
@@ -151,8 +148,6 @@ impl TokenStream {
     ///
     pub fn consume(&mut self) -> Option<Token> {
         let tok = self.tokens.pop_front();
-        self._first = None;
-        self._second = None;
         tok
     }
 }

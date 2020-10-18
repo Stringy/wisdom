@@ -1,8 +1,7 @@
 use crate::expr::Expr;
-use crate::number::Int;
 use tokenizer::{FromTokens, TokenStream};
 use tokenizer::TokenKind;
-use crate::error::{Error, ErrorKind};
+use crate::error::Error;
 use crate::error::ErrorKind::*;
 
 #[derive(PartialOrd, PartialEq, Debug)]

@@ -1,7 +1,7 @@
 use std::fmt::{self, Display, Formatter};
 use std::str::FromStr;
 
-use tokenizer::{TokenKind, FromTokens, TokenStream};
+use tokenizer::{FromTokens, TokenStream};
 use crate::error::Error;
 use crate::error::ErrorKind::InvalidToken;
 

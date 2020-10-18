@@ -1,6 +1,6 @@
 use std::fmt::{Debug, Formatter, Display};
 use std::fmt;
-use tokenizer::{Token, Position, TokenKind};
+use tokenizer::Position;
 
 #[derive(Debug)]
 pub struct Error {

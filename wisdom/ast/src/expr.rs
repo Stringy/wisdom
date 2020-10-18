@@ -1,9 +1,6 @@
-use tokenizer::{FromTokens, TokenStream, TokenKind, Token};
+use tokenizer::{FromTokens, TokenStream, TokenKind};
 
-use crate::number::Int;
 use crate::operation::Op;
-use std::str::FromStr;
-use std::ops::Add;
 use crate::value::Value;
 use std::collections::VecDeque;
 

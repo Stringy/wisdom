@@ -1,10 +1,7 @@
 use tokenizer::{FromTokens, TokenStream};
 use std::str::FromStr;
-use std::ops::Add;
-use std::borrow::Borrow;
 use crate::error::{Error, ErrorKind};
 use crate::error::ErrorKind::UnexpectedEOL;
-use crate::operation::Op;
 use std::fmt::{Display, Formatter};
 use std::fmt;
 
@@ -54,7 +51,7 @@ impl FromTokens for Value {
                         Float => Ok(Self::Float(f64::from_str(tok.literal.as_str()).map_err(|_| Error::from(ErrorKind::InvalidLit))?)),
                         String => Ok({
                             let unescaped: std::string::String = tok.literal.chars().filter(|c| *c != '\\').collect();
-                            Self::String(unescaped[1..unescaped.len()-1].to_owned())
+                            Self::String(unescaped[1..unescaped.len() - 1].to_owned())
                         })
                     }
                 }
@@ -230,5 +227,5 @@ impl Value {
 
 #[cfg(test)]
 mod test {
-    use super::*;
+    // TODO: add some tests for all operations
 }

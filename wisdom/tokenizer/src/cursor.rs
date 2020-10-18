@@ -1,8 +1,6 @@
 use std::str::Chars;
-use std::iter::Peekable;
 
 use crate::token::{Token, TokenKind, LiteralKind};
-use std::collections::VecDeque;
 use crate::{Position, Base};
 
 ///
@@ -12,7 +10,7 @@ use crate::{Position, Base};
 ///
 pub struct Cursor<'a> {
     /// Total size of the input
-    size: usize,
+    _size: usize,
     /// End of the previous token
     prev: usize,
     /// Current index into the chars list
@@ -34,7 +32,7 @@ impl<'a> Cursor<'a> {
     ///
     pub fn new(input: &'a str, emit_whitespace: bool) -> Self {
         Self {
-            size: input.len(),
+            _size: input.len(),
             prev: 0,
             idx: 0,
             chars: input.chars(),
@@ -97,7 +95,7 @@ impl<'a> Cursor<'a> {
     /// that point, as you'd normally expect. Instead it will return
     /// a copy of the nth character or a NUL byte if n is too large.
     ///
-    /// TODO: consider refactoring this potentially enormous and frequent copy.
+    /// TODO: refactor this potentially enormous and frequent copy.
     ///
     fn nth(&self, n: usize) -> char {
         self.chars().nth(n).unwrap_or('\0')
@@ -212,6 +210,18 @@ impl Cursor<'_> {
         TokenKind::Literal { kind: LiteralKind::String }
     }
 
+    ///
+    /// Consumes a numeric literal, including parsing of different bases and kinds
+    /// Current base support is Hex, Dec, Bin, and Oct literals.
+    /// Current kind support is Float or Int
+    ///
+    /// For a given literal, only the parsable part of the literal is returned in the token
+    /// i.e 0x12345 => 12345
+    ///     0b11100 => 11100
+    /// This makes it much easier to convert into an actual value later on
+    ///
+    /// TODO: add some tests for consume_number_literal
+    ///
     fn consume_number_literal(&mut self) -> TokenKind {
         match self.first() {
             'x' => {
@@ -245,10 +255,21 @@ impl Cursor<'_> {
         }
     }
 
+    ///
+    /// Helper wrapper function for those two-character tokens that expect an equals
+    /// i.e ==, <=, >= etc
+    ///
     fn expect_equals(&mut self, is_expected: TokenKind, is_unexpected: TokenKind) -> TokenKind {
         self.expect_next('=', is_expected, is_unexpected)
     }
 
+    ///
+    /// Helper function for returning different token kinds based on the next character.
+    /// If the next character is as expected, one token kind is returned, if it is anything else,
+    /// another token kind is returned.
+    ///
+    /// If the character is as expected, we also advance to the next character.
+    ///
     fn expect_next(&mut self, expected: char, is_expected: TokenKind, is_unexpected: TokenKind) -> TokenKind {
         match self.first() {
             c if c == expected => {
@@ -297,7 +318,7 @@ impl Cursor<'_> {
     /// the given function returns false
     ///
     fn consume_while<F: FnOnce(char) -> bool + Copy>(&mut self, func: F) {
-        // TODO: is there a better way of wrapping the func like this?
+        // TODO: is there a better way of wrapping the closure like this?
         self.consume_until(|c| !func(c))
     }
 
@@ -305,6 +326,7 @@ impl Cursor<'_> {
     /// Returns the number of characters consumed since we last emitted
     /// a Token.
     ///
+    #[allow(dead_code)]
     fn len_consumed(&self) -> usize {
         self.idx - self.prev
     }
