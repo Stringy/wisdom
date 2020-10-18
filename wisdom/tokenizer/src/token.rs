@@ -34,6 +34,8 @@ pub enum TokenKind {
     SemiColon,
     LeftParen,
     RightParen,
+    LeftBrace,
+    RightBrace,
     Lt,
     LtEq,
     Gt,

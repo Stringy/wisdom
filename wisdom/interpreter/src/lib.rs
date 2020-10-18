@@ -8,7 +8,8 @@ use ast::value::Value;
 use tokenizer::{TokenStream, FromTokens, TokenKind};
 use ast::expr::Expr;
 use ast::operation::Op;
-use ast::assignments::{Assign, Binding};
+use ast::stmt::Stmt;
+use ast::keywords::STMT_START;
 
 pub struct Interpreter {
     globals: Context,
@@ -22,26 +23,27 @@ impl Interpreter {
     }
 
     pub fn eval_line(&mut self, input: &str) -> Result<Value, ()> {
-        let mut tokens = TokenStream::new(input);
+        let tokens = TokenStream::new(input);
         loop {
             return if let Some(tok) = tokens.first() {
                 match tok.kind {
-                    TokenKind::Literal{..} => {
-                        let expr = Expr::from_tokens(&mut tokens).map_err(|_| ())?;
+                    TokenKind::Literal { .. } => {
+                        let expr = Expr::from_tokens(&tokens).map_err(|_| ())?;
                         self.visit_expr(expr)
                     }
                     TokenKind::Identifier => {
-                        if tok.literal == "let" {
-                            self.visit_bind(Binding::from_tokens(&mut tokens).map_err(|_| ())?)
+                        if STMT_START.contains(&tok.literal.as_str()) {
+                            let stmt = Stmt::from_tokens(&tokens).map_err(|_| ())?;
+                            self.visit_stmt(stmt)
                         } else if let Some(next) = tokens.second() {
                             match next.kind {
                                 _ if next.kind.is_operator() => {
-                                    let expr = Expr::from_tokens(&mut tokens).map_err(|_| ())?;
+                                    let expr = Expr::from_tokens(&tokens).map_err(|_| ())?;
                                     self.visit_expr(expr)
                                 }
                                 TokenKind::Eq => {
-                                    let assign = Assign::from_tokens(&mut tokens).map_err(|_| ())?;
-                                    self.visit_assign(assign)
+                                    let assign = Stmt::from_tokens(&tokens).map_err(|_| ())?;
+                                    self.visit_stmt(assign)
                                 }
                                 _ => Err(())
                             }
@@ -60,21 +62,23 @@ impl Interpreter {
         }
     }
 
-    fn visit_assign(&mut self, assign: Assign) -> Result<Value, ()> {
-        if self.globals.contains_key(assign.name.as_str()) {
-            // we have this name already, re-assign its value to a new one
-            let value = self.visit_expr(assign.value)?;
-            self.globals.insert(assign.name, value.clone());
-            Ok(value)
-        } else {
-            let value = self.visit_expr(assign.value)?;
-            self.globals.insert(assign.name, value.clone());
-            Ok(value)
+    fn visit_stmt(&mut self, stmt: Stmt) -> Result<Value, ()> {
+        use Stmt::*;
+        match stmt {
+            Assignment(Value::Named(name), expr) => {
+                if self.globals.contains_key(name.as_str()) {
+                    // we have this name already, re-assign its value to a new one
+                    let value = self.visit_expr(expr)?;
+                    self.globals.insert(name, value.clone());
+                    Ok(value)
+                } else {
+                    let value = self.visit_expr(expr)?;
+                    self.globals.insert(name, value.clone());
+                    Ok(value)
+                }
+            }
+            _ => unimplemented!()
         }
-    }
-
-    fn visit_bind(&mut self, bind: Binding) -> Result<Value, ()> {
-        self.visit_assign(bind.into_inner())
     }
 
     fn visit_expr(&self, expr: Expr) -> Result<Value, ()> {

@@ -169,6 +169,8 @@ impl Cursor<'_> {
             ';' => SemiColon,
             '(' => LeftParen,
             ')' => RightParen,
+            '{' => LeftBrace,
+            '}' => RightBrace,
 
             _ => panic!("invalid character: {:?}", ch)
         };
