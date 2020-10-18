@@ -12,6 +12,7 @@ pub enum Value {
     Bool(bool),
     String(String),
     Named(String),
+    None,
 }
 
 impl Display for Value {
@@ -22,6 +23,7 @@ impl Display for Value {
             Value::Bool(n) => write!(f, "{}", n),
             Value::String(n) => write!(f, "{}", n),
             Value::Named(n) => write!(f, "{}", n),
+            Value::None => write!(f, "none")
         }
     }
 }
@@ -60,6 +62,7 @@ impl FromTokens for Value {
                     Ok(match tok.literal.as_str() {
                         "true" => Value::Bool(true),
                         "false" => Value::Bool(false),
+                        "none" => Value::None,
                         _ => Value::Named(tok.literal.to_owned())
                     })
                 }
@@ -78,6 +81,9 @@ impl From<bool> for Value {
 }
 
 impl Value {
+    ///
+    /// Attempts to add two values together.
+    ///
     pub fn try_add(&self, rhs: &Value) -> Result<Value, ()> {
         match self {
             Value::Int(n) => {
