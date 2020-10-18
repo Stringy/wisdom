@@ -113,10 +113,10 @@ impl Cursor<'_> {
     /// use tokenizer::Cursor;
     /// use tokenizer::TokenKind;
     ///
-    /// let mut cursor = Cursor::new("123", false);
+    /// let mut cursor = Cursor::new("ident", false);
     /// let tok = cursor.next_token();
-    /// assert_eq!(tok.kind, TokenKind::Number);
-    /// assert_eq!(tok.literal.as_str(), "123");
+    /// assert_eq!(tok.kind, TokenKind::Identifier);
+    /// assert_eq!(tok.literal.as_str(), "ident");
     /// ```
     ///
     pub fn next_token(&mut self) -> Token {
@@ -185,14 +185,17 @@ impl Cursor<'_> {
     fn parse_number_literal(&mut self) -> TokenKind {
         match self.first() {
             'x' => {
+                self.next();
                 self.consume_while(|c| c.is_ascii_hexdigit());
                 TokenKind::Literal { kind: LiteralKind::Int { base: Base::Hex } }
             }
             'b' => {
+                self.next();
                 self.consume_while(|c| c == '0' || c == '1');
                 TokenKind::Literal { kind: LiteralKind::Int { base: Base::Bin } }
             }
             'o' => {
+                self.next();
                 self.consume_while(|c| c > '0' && c < '7');
                 TokenKind::Literal { kind: LiteralKind::Int { base: Base::Oct } }
             }
@@ -320,5 +323,14 @@ mod test {
         ];
 
         assert_eq!(&tokens[..], &expected[..]);
+    }
+
+    #[test]
+    fn test_number_hex() {
+        let tokens = tokenize("0x123", false).collect::<Vec<Token>>();
+        let expected = vec![
+            Token { kind: TokenKind::Literal { kind: LiteralKind::Int { base: Base::Hex } }, literal: "0x123".to_string(), position: Position { line: 1, column: 1 } }
+        ];
+        assert_eq!(tokens, expected);
     }
 }

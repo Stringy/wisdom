@@ -109,11 +109,13 @@ impl TokenStream {
     /// Look ahead at the next `Token` without consuming it.
     ///
     /// ```
-    /// use tokenizer::{TokenStream, Token, TokenKind, Position};
+    /// use tokenizer::{TokenStream, Token, TokenKind, Position, LiteralKind, Base};
     ///
     /// let mut tokens = TokenStream::new("1+1");
     /// let tok = Some(Token {
-    ///     kind: TokenKind::Number,
+    ///     kind: TokenKind::Literal {
+    ///          kind: LiteralKind::Int { base: Base::Dec },
+    ///     },
     ///     literal: "1".to_string(),
     ///     position: Position {
     ///         line: 1,
@@ -138,11 +140,13 @@ impl TokenStream {
     /// ```
     /// use tokenizer::{Token, TokenStream};
     /// use tokenizer::TokenKind::*;
+    /// use tokenizer::LiteralKind::Int;
+    /// use tokenizer::Base::Dec;
     ///
     /// let mut tokens = TokenStream::new("1+2");
-    /// assert_eq!(tokens.consume().unwrap().kind, Number);
+    /// assert_eq!(tokens.consume().unwrap().kind, Literal { kind: Int { base: Dec }});
     /// assert_eq!(tokens.consume().unwrap().kind, Add);
-    /// assert_eq!(tokens.consume().unwrap().kind, Number);
+    /// assert_eq!(tokens.consume().unwrap().kind, Literal { kind: Int { base: Dec }});
     /// ```
     ///
     pub fn consume(&mut self) -> Option<Token> {
