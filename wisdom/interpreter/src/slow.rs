@@ -8,7 +8,7 @@ use ast::block::Block;
 use std::path::PathBuf;
 
 use crate::scope::Context;
-use crate::Interpreter;
+use crate::{Interpreter, builtin};
 
 pub struct SlowInterpreter {
     globals: Context,
@@ -32,7 +32,30 @@ impl SlowInterpreter {
             While(expr, block) => {
                 self.visit_while(expr, block)
             }
+            Call(name, args) => {
+                self.visit_call(name, args)
+            }
             _ => unimplemented!()
+        }
+    }
+
+    fn visit_call(&mut self, name: Value, args: Vec<Expr>) -> Result<Value, ()> {
+        if let Value::Named(name) = name {
+            if let Some(_func) = self.globals.lookup(&name) {
+                unimplemented!("no user defined functions yet");
+            } else {
+                if builtin::exists(&name) {
+                    let mut evaled_args = Vec::new();
+                    for arg in args {
+                        evaled_args.push(self.visit_expr(arg.to_owned())?);
+                    }
+                    builtin::run(&name, evaled_args)
+                } else {
+                    Err(())
+                }
+            }
+        } else {
+            panic!("expected named value in call statement");
         }
     }
 
@@ -111,6 +134,10 @@ impl SlowInterpreter {
                             TokenKind::Eq => {
                                 let assign = Stmt::from_tokens(&tokens).map_err(|_| ())?;
                                 self.visit_stmt(assign)
+                            },
+                            TokenKind::LeftParen => {
+                                let call = Stmt::from_tokens(&tokens).map_err(|_| ())?;
+                                self.visit_stmt(call)
                             }
                             _ => Err(())
                         }

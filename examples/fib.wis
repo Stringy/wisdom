@@ -1,0 +1,14 @@
+a = 1;
+b = 1;
+c = 3;
+
+print("1 = ", a);
+print("2 = ", b);
+
+while c < 10 {
+    tmp = a + b;
+    a = b;
+    b = tmp;
+    print(c, " = ", tmp);
+    c = c + 1;
+}

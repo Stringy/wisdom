@@ -5,7 +5,7 @@ use crate::value::Value;
 use std::collections::VecDeque;
 
 use crate::ext::*;
-use crate::error::{Error, ErrorKind};
+use crate::error::{Error};
 use crate::error::ErrorKind::InvalidToken;
 
 #[derive(Debug, PartialOrd, PartialEq, Clone)]
@@ -60,7 +60,7 @@ impl FromTokens for Expr {
                         operators.push_back(op);
                     }
                 }
-                TokenKind::Literal {..} | TokenKind::Identifier => {
+                TokenKind::Literal { .. } | TokenKind::Identifier => {
                     operands.push_back(Expr::Leaf(Value::from_tokens(tokens)?));
                 }
                 TokenKind::SemiColon | TokenKind::RightParen => {

@@ -1,5 +1,6 @@
-pub mod scope;
+mod scope;
 mod slow;
+mod builtin;
 
 pub use slow::*;
 

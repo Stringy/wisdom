@@ -11,6 +11,7 @@ pub enum Stmt {
     While(Expr, Block),
     Binding(Value, Expr),
     Assignment(Value, Expr),
+    Call(Value, Vec<Expr>),
 }
 
 impl FromTokens for Stmt {
@@ -27,11 +28,10 @@ impl FromTokens for Stmt {
                     "while" => Self::while_from_tokens(tokens),
                     "let" => Self::binding_from_tokens(tokens),
                     _ => {
-                        if let Some(Token { kind: Eq, .. }) = tokens.second() {
-                            // looks like an assignment
-                            Self::assignment_from_tokens(tokens)
-                        } else {
-                            Err(())
+                        match tokens.second() {
+                            Some(Token { kind: Eq, .. }) => Self::assignment_from_tokens(tokens),
+                            Some(Token { kind: LeftParen, .. }) => Self::function_call_from_tokens(tokens),
+                            _ => Err(())
                         }
                     }
                 }
@@ -86,5 +86,24 @@ impl Stmt {
         tokens.expect(TokenKind::Eq).ok_or(())?;
         let expr = Expr::from_tokens(tokens).map_err(|_| ())?;
         Ok(Self::Assignment(Value::Named(name.literal.to_owned()), expr))
+    }
+
+    fn function_call_from_tokens(tokens: &TokenStream) -> Result<Self, ()> {
+        let name_tok = tokens.consume().ok_or(())?;
+        tokens.expect(TokenKind::LeftParen).ok_or(())?;
+
+        let mut exprs = Vec::new();
+        loop {
+            exprs.push(Expr::from_tokens(tokens).map_err(|_| ())?);
+            match tokens.expect(TokenKind::Comma) {
+                Some(_) => continue,
+                None => {
+                    break;
+                }
+            }
+        }
+
+        tokens.expect(TokenKind::SemiColon).ok_or(())?;
+        Ok(Self::Call(Value::Named(name_tok.literal.to_owned()), exprs))
     }
 }

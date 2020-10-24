@@ -59,14 +59,22 @@ impl Context {
     /// on the stack.
     ///
     pub fn store(&self, name: String, value: Value) {
-        let mut scopes = self.scopes.borrow_mut();
-        let end = scopes.len();
-        let scope = scopes.get_mut(end - 1);
-        match scope {
-            Some(scope) => {
-                scope.insert(name, value);
+        if let Some(_) = self.lookup(&name) {
+            for scope in self.scopes.borrow_mut().iter_mut().rev() {
+                if let Some(_) = scope.get_mut(&name) {
+                    scope.insert(name.to_owned(), value.to_owned());
+                }
             }
-            None => panic!("there should always be at least one scope")
+        } else {
+            let mut scopes = self.scopes.borrow_mut();
+            let end = scopes.len();
+            let scope = scopes.get_mut(end - 1);
+            match scope {
+                Some(scope) => {
+                    scope.insert(name, value);
+                }
+                None => panic!("there should always be at least one scope")
+            }
         }
     }
 }
