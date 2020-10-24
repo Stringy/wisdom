@@ -10,3 +10,4 @@ default-run = "welp"
 [dependencies]
 lazy_static = "1.4.0"
 wisdom = { path = "../wisdom" }
+clap = "2.33.0"
