@@ -42,6 +42,8 @@ impl FromTokens for Expr {
 
                     // recurse to calculate the sub-expression
                     operands.push_back(Expr::from_tokens(tokens)?);
+
+                    tokens.expect(TokenKind::RightParen).ok_or(Error::from(InvalidToken))?;
                 }
                 _ if tok.kind.is_operator() => {
                     let op = Op::from_tokens(tokens)?;
@@ -62,10 +64,6 @@ impl FromTokens for Expr {
                 }
                 TokenKind::Literal { .. } | TokenKind::Identifier => {
                     operands.push_back(Expr::Leaf(Value::from_tokens(tokens)?));
-                }
-                TokenKind::SemiColon | TokenKind::RightParen => {
-                    tokens.consume();
-                    break;
                 }
                 _ => break,
             }

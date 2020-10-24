@@ -37,7 +37,11 @@ Current Roadmap:
 - [x] Expand literal kinds
 - [x] Expand expressions, inc boolean operations.
 - [x] String literals, including appropriate escapes
-- [ ] proper keyword support
-- [ ] Functions
-- [ ] Statements
+- [x] Statements
+- [ ] built in functions
+    - [x] print
+    - [ ] ... others
+- [ ] User defined Functions
+- [ ] Classes maybe?
+- [ ] A proper interpreter / JIT maybe?
 - [ ] World domination

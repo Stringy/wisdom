@@ -85,6 +85,7 @@ impl Stmt {
         let name = tokens.expect(TokenKind::Identifier).ok_or(())?;
         tokens.expect(TokenKind::Eq).ok_or(())?;
         let expr = Expr::from_tokens(tokens).map_err(|_| ())?;
+        tokens.expect(TokenKind::SemiColon).ok_or(())?;
         Ok(Self::Assignment(Value::Named(name.literal.to_owned()), expr))
     }
 
@@ -103,6 +104,7 @@ impl Stmt {
             }
         }
 
+        tokens.expect(TokenKind::RightParen).ok_or(())?;
         tokens.expect(TokenKind::SemiColon).ok_or(())?;
         Ok(Self::Call(Value::Named(name_tok.literal.to_owned()), exprs))
     }

@@ -171,4 +171,3 @@ impl Interpreter for SlowInterpreter {
         Ok(Value::None)
     }
 }
-
