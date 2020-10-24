@@ -7,7 +7,7 @@ use ast::keywords::STMT_START;
 use ast::block::Block;
 use std::path::PathBuf;
 
-use crate::context::Context;
+use crate::scope::Context;
 use crate::Interpreter;
 
 pub struct SlowInterpreter {
@@ -26,7 +26,7 @@ impl SlowInterpreter {
         match stmt {
             Assignment(Value::Named(name), expr) => {
                 let value = self.visit_expr(expr)?;
-                self.globals.insert(name, value.clone());
+                self.globals.store(name, value.clone());
                 Ok(value)
             }
             While(expr, block) => {
@@ -44,9 +44,11 @@ impl SlowInterpreter {
     }
 
     fn visit_block(&mut self, block: Block) -> Result<Value, ()> {
+        self.globals.push();
         for stmt in block.stmts {
             self.visit_stmt(stmt.to_owned())?;
         }
+        self.globals.pop();
         Ok(Value::None)
     }
 
@@ -55,7 +57,7 @@ impl SlowInterpreter {
             Expr::Leaf(v) => {
                 match v {
                     Value::Named(name) => {
-                        let value = self.globals.get(name.as_str()).ok_or(())?;
+                        let value = self.globals.lookup(&name).ok_or(())?;
                         Ok(value.clone())
                     }
                     _ => Ok(v)
@@ -113,8 +115,7 @@ impl SlowInterpreter {
                             _ => Err(())
                         }
                     } else {
-                        let value = self.globals.get(tok.literal.as_str()).cloned();
-                        value.ok_or(())
+                        self.globals.lookup(&tok.literal).ok_or(())
                     }
                 }
                 _ => {
@@ -138,8 +139,7 @@ impl Interpreter for SlowInterpreter {
         let script = fs::read_to_string(path.into()).map_err(|_| ())?;
         let tokens = TokenStream::new(script.as_str());
         while !tokens.is_empty() {
-            let value = self.infer(&tokens)?;
-            println!("{}", value);
+            self.infer(&tokens)?;
         }
         Ok(Value::None)
     }
