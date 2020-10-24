@@ -10,55 +10,22 @@ use ast::expr::Expr;
 use ast::operation::Op;
 use ast::stmt::Stmt;
 use ast::keywords::STMT_START;
+use ast::block::Block;
+use std::path::PathBuf;
 
-pub struct Interpreter {
+pub trait Interpreter {
+    fn eval_line(&mut self, input: &str) -> Result<Value, ()>;
+    fn eval_file<P: Into<PathBuf>>(&mut self, path: P) -> Result<Value, ()>;
+}
+
+pub struct SlowInterpreter {
     globals: Context,
 }
 
-impl Interpreter {
+impl SlowInterpreter {
     pub fn new() -> Self {
         Self {
             globals: Context::new()
-        }
-    }
-
-    pub fn eval_line(&mut self, input: &str) -> Result<Value, ()> {
-        let tokens = TokenStream::new(input);
-        loop {
-            return if let Some(tok) = tokens.first() {
-                match tok.kind {
-                    TokenKind::Literal { .. } => {
-                        let expr = Expr::from_tokens(&tokens).map_err(|_| ())?;
-                        self.visit_expr(expr)
-                    }
-                    TokenKind::Identifier => {
-                        if STMT_START.contains(&tok.literal.as_str()) {
-                            let stmt = Stmt::from_tokens(&tokens).map_err(|_| ())?;
-                            self.visit_stmt(stmt)
-                        } else if let Some(next) = tokens.second() {
-                            match next.kind {
-                                _ if next.kind.is_operator() => {
-                                    let expr = Expr::from_tokens(&tokens).map_err(|_| ())?;
-                                    self.visit_expr(expr)
-                                }
-                                TokenKind::Eq => {
-                                    let assign = Stmt::from_tokens(&tokens).map_err(|_| ())?;
-                                    self.visit_stmt(assign)
-                                }
-                                _ => Err(())
-                            }
-                        } else {
-                            let value = self.globals.get(tok.literal.as_str()).cloned();
-                            value.ok_or(())
-                        }
-                    }
-                    _ => {
-                        Err(())
-                    }
-                }
-            } else {
-                Err(())
-            };
         }
     }
 
@@ -66,19 +33,29 @@ impl Interpreter {
         use Stmt::*;
         match stmt {
             Assignment(Value::Named(name), expr) => {
-                if self.globals.contains_key(name.as_str()) {
-                    // we have this name already, re-assign its value to a new one
-                    let value = self.visit_expr(expr)?;
-                    self.globals.insert(name, value.clone());
-                    Ok(value)
-                } else {
-                    let value = self.visit_expr(expr)?;
-                    self.globals.insert(name, value.clone());
-                    Ok(value)
-                }
+                let value = self.visit_expr(expr)?;
+                self.globals.insert(name, value.clone());
+                Ok(value)
+            }
+            While(expr, block) => {
+                self.visit_while(expr, block)
             }
             _ => unimplemented!()
         }
+    }
+
+    fn visit_while(&mut self, expr: Expr, block: Block) -> Result<Value, ()> {
+        while self.visit_expr(expr.to_owned())?.into_bool() {
+            self.visit_block(block.to_owned())?;
+        }
+        Ok(Value::None)
+    }
+
+    fn visit_block(&mut self, block: Block) -> Result<Value, ()> {
+        for stmt in block.stmts {
+            self.visit_stmt(stmt.to_owned())?;
+        }
+        Ok(Value::None)
     }
 
     fn visit_expr(&self, expr: Expr) -> Result<Value, ()> {
@@ -118,6 +95,61 @@ impl Interpreter {
             Op::BinAnd => lhs.try_bin_and(&rhs),
             Op::BinOr => lhs.try_bin_or(&rhs)
         }
+    }
+
+    fn infer(&mut self, tokens: &TokenStream) -> Result<Value, ()> {
+        if let Some(tok) = tokens.first() {
+            match tok.kind {
+                TokenKind::Literal { .. } => {
+                    let expr = Expr::from_tokens(&tokens).map_err(|_| ())?;
+                    self.visit_expr(expr)
+                }
+                TokenKind::Identifier => {
+                    if STMT_START.contains(&tok.literal.as_str()) {
+                        let stmt = Stmt::from_tokens(&tokens).map_err(|_| ())?;
+                        self.visit_stmt(stmt)
+                    } else if let Some(next) = tokens.second() {
+                        match next.kind {
+                            _ if next.kind.is_operator() => {
+                                let expr = Expr::from_tokens(&tokens).map_err(|_| ())?;
+                                self.visit_expr(expr)
+                            }
+                            TokenKind::Eq => {
+                                let assign = Stmt::from_tokens(&tokens).map_err(|_| ())?;
+                                self.visit_stmt(assign)
+                            }
+                            _ => Err(())
+                        }
+                    } else {
+                        let value = self.globals.get(tok.literal.as_str()).cloned();
+                        value.ok_or(())
+                    }
+                }
+                _ => {
+                    Err(())
+                }
+            }
+        } else {
+            Err(())
+        }
+    }
+}
+
+impl Interpreter for SlowInterpreter {
+    fn eval_line(&mut self, input: &str) -> Result<Value, ()> {
+        let tokens = TokenStream::new(input);
+        self.infer(&tokens)
+    }
+
+    fn eval_file<P: Into<PathBuf>>(&mut self, path: P) -> Result<Value, ()> {
+        use std::fs;
+        let script = fs::read_to_string(path.into()).map_err(|_| ())?;
+        let tokens = TokenStream::new(script.as_str());
+        while !tokens.is_empty() {
+            let value = self.infer(&tokens)?;
+            println!("{}", value);
+        }
+        Ok(Value::None)
     }
 }
 

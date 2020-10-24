@@ -4,6 +4,7 @@ use crate::block::Block;
 use tokenizer::{FromTokens, TokenStream, Token, TokenKind};
 
 
+#[derive(Clone, Debug)]
 pub enum Stmt {
     Return(Expr),
     For(Value, Expr, Block),
@@ -58,13 +59,7 @@ impl Stmt {
             }
 
             let expr = Expr::from_tokens(tokens).map_err(|_| ())?;
-
-            tokens.expect(TokenKind::LeftBrace).ok_or(())?;
-
             let block = Block::from_tokens(tokens).map_err(|_| ())?;
-
-            tokens.expect(TokenKind::RightBrace).ok_or(())?;
-
             Ok(Self::For(variable, expr, block))
         } else {
             Err(())
@@ -74,9 +69,7 @@ impl Stmt {
     fn while_from_tokens(tokens: &TokenStream) -> Result<Self, ()> {
         tokens.consume();
         let expr = Expr::from_tokens(tokens).map_err(|_| ())?;
-        tokens.expect(TokenKind::LeftBrace).ok_or(())?;
         let block = Block::from_tokens(tokens).map_err(|_| ())?;
-        tokens.expect(TokenKind::RightBrace).ok_or(())?;
         Ok(Self::While(expr, block))
     }
 

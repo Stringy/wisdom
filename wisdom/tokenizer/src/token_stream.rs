@@ -25,6 +25,10 @@ impl TokenStream {
         }
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.tokens.borrow().is_empty()
+    }
+
     ///
     /// Looks ahead at the next token, without consuming it.
     ///

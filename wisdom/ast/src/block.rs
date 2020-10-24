@@ -1,8 +1,9 @@
 use tokenizer::{FromTokens, TokenStream, TokenKind};
 use crate::stmt::Stmt;
 
+#[derive(Clone, Debug)]
 pub struct Block {
-    stmts: Vec<Stmt>,
+    pub stmts: Vec<Stmt>,
 }
 
 impl FromTokens for Block {

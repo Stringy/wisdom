@@ -8,7 +8,7 @@ use crate::ext::*;
 use crate::error::{Error, ErrorKind};
 use crate::error::ErrorKind::InvalidToken;
 
-#[derive(Debug, PartialOrd, PartialEq)]
+#[derive(Debug, PartialOrd, PartialEq, Clone)]
 pub enum Expr {
     Leaf(Value),
     Tree(Box<Expr>, Op, Box<Expr>),
@@ -67,7 +67,7 @@ impl FromTokens for Expr {
                     tokens.consume();
                     break;
                 }
-                _ => return Err(Error::from(ErrorKind::InvalidToken))
+                _ => break,
             }
 
             peeked = tokens.peek();
