@@ -4,8 +4,8 @@ use tokenizer::{Position, TokenKind};
 
 #[derive(PartialOrd, PartialEq, Debug, Clone)]
 pub struct ParserError {
-    kind: ErrorKind,
-    position: Option<Position>,
+    pub kind: ErrorKind,
+    pub position: Option<Position>,
 }
 
 #[derive(PartialOrd, PartialEq, Debug, Clone)]

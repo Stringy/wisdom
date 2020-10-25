@@ -5,14 +5,10 @@ use std::fmt;
 
 #[derive(PartialEq, Debug, Clone)]
 pub struct Error {
-    kind: ErrorKind
+    pub kind: ErrorKind
 }
 
-impl Error {
-    pub fn kind(self) -> ErrorKind {
-        self.kind
-    }
-}
+impl Error {}
 
 impl Display for Error {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
