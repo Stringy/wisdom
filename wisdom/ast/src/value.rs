@@ -1,7 +1,7 @@
 use tokenizer::{FromTokens, TokenStream};
 use std::str::FromStr;
-use crate::error::{Error, ErrorKind};
-use crate::error::ErrorKind::UnexpectedEOL;
+use crate::error::{ParserError};
+use crate::error::ErrorKind::{UnexpectedEOL, InvalidLit};
 use std::fmt::{Display, Formatter};
 use std::fmt;
 
@@ -29,7 +29,7 @@ impl Display for Value {
 }
 
 impl FromTokens for Value {
-    type Error = Error;
+    type Error = ParserError;
 
     fn from_tokens(tokens: &TokenStream) -> Result<Self, Self::Error> {
         let tok = tokens.peek();
@@ -38,19 +38,22 @@ impl FromTokens for Value {
             use tokenizer::LiteralKind::*;
             use tokenizer::Base::*;
 
+            let pos = Some(tok.position);
+            let err = ParserError::new(InvalidLit, pos);
+
             match tok.kind {
                 Literal { kind } => {
                     tokens.consume();
                     match kind {
                         Int { base } => {
                             Ok(match base {
-                                Hex => Self::Int(i64::from_str_radix(tok.literal.as_str(), 16).map_err(|_| Error::from(ErrorKind::InvalidLit))?),
-                                Dec => Self::Int(i64::from_str_radix(tok.literal.as_str(), 10).map_err(|_| Error::from(ErrorKind::InvalidLit))?),
-                                Oct => Self::Int(i64::from_str_radix(tok.literal.as_str(), 8).map_err(|_| Error::from(ErrorKind::InvalidLit))?),
-                                Bin => Self::Int(i64::from_str_radix(tok.literal.as_str(), 2).map_err(|_| Error::from(ErrorKind::InvalidLit))?),
+                                Hex => Self::Int(i64::from_str_radix(tok.literal.as_str(), 16).map_err(|_| err)?),
+                                Dec => Self::Int(i64::from_str_radix(tok.literal.as_str(), 10).map_err(|_| err)?),
+                                Oct => Self::Int(i64::from_str_radix(tok.literal.as_str(), 8).map_err(|_| err)?),
+                                Bin => Self::Int(i64::from_str_radix(tok.literal.as_str(), 2).map_err(|_| err)?),
                             })
                         }
-                        Float => Ok(Self::Float(f64::from_str(tok.literal.as_str()).map_err(|_| Error::from(ErrorKind::InvalidLit))?)),
+                        Float => Ok(Self::Float(f64::from_str(tok.literal.as_str()).map_err(|_| err)?)),
                         String => Ok({
                             let unescaped: std::string::String = tok.literal.chars().filter(|c| *c != '\\').collect();
                             Self::String(unescaped[1..unescaped.len() - 1].to_owned())
@@ -69,7 +72,7 @@ impl FromTokens for Value {
                 _ => unimplemented!()
             }
         } else {
-            Err(UnexpectedEOL.into())
+            Err(ParserError::new(UnexpectedEOL, None))
         }
     }
 }
@@ -77,163 +80,6 @@ impl FromTokens for Value {
 impl From<bool> for Value {
     fn from(b: bool) -> Self {
         Value::Bool(b)
-    }
-}
-
-impl Value {
-    ///
-    /// Attempts to add two values together.
-    ///
-    pub fn try_add(&self, rhs: &Value) -> Result<Value, ()> {
-        match self {
-            Value::Int(n) => {
-                match rhs {
-                    Value::Int(m) => Ok(Value::Int(n + m)),
-                    Value::Float(m) => Ok(Value::Float(*n as f64 + m)),
-                    _ => Err(())
-                }
-            }
-            Value::Float(n) => {
-                match rhs {
-                    Value::Int(m) => Ok(Value::Float(n + *m as f64)),
-                    Value::Float(m) => Ok(Value::Float(n + m)),
-                    _ => Err(())
-                }
-            }
-            Value::String(n) => {
-                match rhs {
-                    Value::String(m) => Ok(Value::String((n.to_owned() + m).to_owned())),
-                    _ => Err(())
-                }
-            }
-            _ => Err(())
-        }
-    }
-
-    pub fn try_sub(&self, rhs: &Value) -> Result<Value, ()> {
-        match self {
-            Value::Int(n) => {
-                match rhs {
-                    Value::Int(m) => Ok(Value::Int(n - m)),
-                    Value::Float(m) => Ok(Value::Float(*n as f64 - m)),
-                    _ => Err(())
-                }
-            }
-            Value::Float(n) => {
-                match rhs {
-                    Value::Int(m) => Ok(Value::Float(n - *m as f64)),
-                    Value::Float(m) => Ok(Value::Float(n - m)),
-                    _ => Err(())
-                }
-            }
-            _ => Err(())
-        }
-    }
-
-    pub fn try_mul(&self, rhs: &Value) -> Result<Value, ()> {
-        match self {
-            Value::Int(n) => {
-                match rhs {
-                    Value::Int(m) => Ok(Value::Int(n * m)),
-                    Value::Float(m) => Ok(Value::Float(*n as f64 * m)),
-                    _ => Err(())
-                }
-            }
-            Value::Float(n) => {
-                match rhs {
-                    Value::Int(m) => Ok(Value::Float(n * *m as f64)),
-                    Value::Float(m) => Ok(Value::Float(n * m)),
-                    _ => Err(())
-                }
-            }
-            _ => Err(())
-        }
-    }
-
-    pub fn try_div(&self, rhs: &Value) -> Result<Value, ()> {
-        match self {
-            Value::Int(n) => {
-                match rhs {
-                    Value::Int(m) => Ok(Value::Float(*n as f64 / *m as f64)),
-                    Value::Float(m) => Ok(Value::Float(*n as f64 / m)),
-                    _ => Err(())
-                }
-            }
-            Value::Float(n) => {
-                match rhs {
-                    Value::Int(m) => Ok(Value::Float(n / *m as f64)),
-                    Value::Float(m) => Ok(Value::Float(n / m)),
-                    _ => Err(())
-                }
-            }
-            _ => Err(())
-        }
-    }
-
-    pub fn is_equal(&self, rhs: &Value) -> bool {
-        *self == *rhs
-    }
-
-    pub fn is_lt(&self, rhs: &Value) -> bool {
-        *self < *rhs
-    }
-
-    pub fn is_gt(&self, rhs: &Value) -> bool {
-        *self > *rhs
-    }
-
-    pub fn and(&self, rhs: &Value) -> bool {
-        self.into_bool() && rhs.into_bool()
-    }
-
-    pub fn or(&self, rhs: &Value) -> bool {
-        self.into_bool() || rhs.into_bool()
-    }
-
-    pub fn try_xor(&self, rhs: &Value) -> Result<Value, ()> {
-        match self {
-            Value::Int(n) => {
-                match rhs {
-                    Value::Int(m) => Ok(Value::Int(n ^ m)),
-                    _ => Err(())
-                }
-            }
-            _ => Err(())
-        }
-    }
-
-    pub fn try_bin_and(&self, rhs: &Value) -> Result<Value, ()> {
-        match self {
-            Value::Int(n) => {
-                match rhs {
-                    Value::Int(m) => Ok(Value::Int(n & m)),
-                    _ => Err(())
-                }
-            }
-            _ => Err(())
-        }
-    }
-
-    pub fn try_bin_or(&self, rhs: &Value) -> Result<Value, ()> {
-        match self {
-            Value::Int(n) => {
-                match rhs {
-                    Value::Int(m) => Ok(Value::Int(n | m)),
-                    _ => Err(())
-                }
-            }
-            _ => Err(())
-        }
-    }
-
-    pub fn into_bool(&self) -> bool {
-        match self {
-            Value::Int(n) => *n != 0,
-            Value::Float(n) => *n != 0f64,
-            Value::String(s) => !s.is_empty(),
-            Value::Bool(b) => *b,
-            _ => false
-        }
     }
 }
 

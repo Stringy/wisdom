@@ -6,6 +6,7 @@ use clap::{Arg, App};
 use std::io::Write;
 
 use wisdom::interpreter::{Interpreter, SlowInterpreter};
+use wisdom::ast::value::Value;
 
 fn do_write(msg: &str) {
     std::io::stdout().write(msg.as_bytes()).unwrap();
@@ -48,8 +49,12 @@ fn main() {
                 }
 
                 match interp.eval_line(line.as_str()) {
-                    Ok(v) => do_write(format!("{}\n", v).as_str()),
-                    Err(_) => do_write("failed\n")
+                    Ok(v) => {
+                        if v != Value::None {
+                            do_write(format!("{}\n", v).as_str())
+                        }
+                    },
+                    Err(e) => do_write(format!("{}\n", e).as_str())
                 }
             }
         }

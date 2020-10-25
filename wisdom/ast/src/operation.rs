@@ -2,8 +2,8 @@ use std::fmt::{self, Display, Formatter};
 use std::str::FromStr;
 
 use tokenizer::{FromTokens, TokenStream};
-use crate::error::Error;
-use crate::error::ErrorKind::InvalidToken;
+use crate::error::ParserError;
+use crate::error::ErrorKind::{ExpectedOperator};
 
 #[derive(Debug, PartialOrd, PartialEq, Copy, Clone)]
 pub enum Op {
@@ -90,11 +90,13 @@ impl FromStr for Op {
 }
 
 impl FromTokens for Op {
-    type Error = Error;
+    type Error = ParserError;
 
     fn from_tokens(iter: &TokenStream) -> Result<Self, Self::Error> {
-        let tok = iter.expect_fn(|k| k.is_operator()).ok_or(InvalidToken)?;
-        Self::from_str(tok.literal.as_str()).map_err(|_| InvalidToken.into())
+        let tok = iter.expect_fn(|k| k.is_operator()).ok_or(
+            ParserError::new(ExpectedOperator, iter.position())
+        )?;
+        Self::from_str(tok.literal.as_str()).map_err(|_| ParserError::new(ExpectedOperator, Some(tok.position)))
     }
 }
 

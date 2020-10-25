@@ -1,45 +1,50 @@
 use std::fmt::{Debug, Formatter, Display};
 use std::fmt;
-use tokenizer::Position;
+use tokenizer::{Position, TokenKind};
 
-#[derive(Debug)]
-pub struct Error {
-    repr: Repr
-}
-
-#[derive(Debug)]
-pub enum Repr {
-    Simple(ErrorKind),
-    Custom(Box<Custom>),
-}
-
-#[derive(Debug)]
-pub struct Custom {
+#[derive(PartialOrd, PartialEq, Debug, Clone)]
+pub struct ParserError {
     kind: ErrorKind,
-    position: Position,
-    error: Box<dyn std::error::Error + Send + Sync>,
+    position: Option<Position>,
 }
 
-#[derive(Debug)]
+#[derive(PartialOrd, PartialEq, Debug, Clone)]
 pub enum ErrorKind {
-    InvalidToken,
-    Incomplete,
-    UnexpectedEOL,
+    InvalidToken(TokenKind),
     InvalidLit,
+    UnexpectedEOL,
+    UnmatchedExpr,
+    ExpectedOperator,
+    ExpectedIdent(&'static str),
+    ExpectSemiColon,
+    ExpectedTokens(Vec<TokenKind>),
 }
 
-impl From<ErrorKind> for Error {
-    fn from(k: ErrorKind) -> Self {
-        Self { repr: Repr::Simple(k) }
+impl From<TokenKind> for ErrorKind {
+    fn from(t: TokenKind) -> Self {
+        Self::InvalidToken(t)
     }
 }
 
-impl Error {}
+impl From<Vec<TokenKind>> for ErrorKind {
+    fn from(ts: Vec<TokenKind>) -> Self {
+        Self::ExpectedTokens(ts)
+    }
+}
 
-impl Display for Error {
+impl ParserError {
+    pub fn new<K: Into<ErrorKind>>(kind: K, position: Option<Position>) -> Self {
+        Self {
+            kind: kind.into(),
+            position
+        }
+    }
+}
+
+impl Display for ParserError {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "{:?}", self)
     }
 }
 
-impl std::error::Error for Error {}
+impl std::error::Error for ParserError {}

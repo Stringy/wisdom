@@ -1,5 +1,5 @@
 use std::collections::VecDeque;
-use crate::{Token, tokenize, TokenKind};
+use crate::{Token, tokenize, TokenKind, Position};
 use std::cell::RefCell;
 use crate::TokenKind::Whitespace;
 
@@ -25,8 +25,23 @@ impl TokenStream {
         }
     }
 
+    ///
+    /// Whether there are any tokens left.
+    ///
     pub fn is_empty(&self) -> bool {
         self.tokens.borrow().is_empty()
+    }
+
+    ///
+    /// Returns the current position of the tokenizer, i.e. the location
+    /// of the next unconsumed token.
+    ///
+    pub fn position(&self) -> Option<Position> {
+        if let Some(tok) = self.first() {
+            Some(tok.position)
+        } else {
+            None
+        }
     }
 
     ///

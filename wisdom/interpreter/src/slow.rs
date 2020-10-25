@@ -8,7 +8,9 @@ use ast::block::Block;
 use std::path::PathBuf;
 
 use crate::scope::Context;
-use crate::{Interpreter, builtin};
+use crate::{Interpreter, builtin, Error};
+use crate::error::ErrorKind::*;
+use crate::value::Operations;
 
 pub struct SlowInterpreter {
     globals: Context,
@@ -21,7 +23,7 @@ impl SlowInterpreter {
         }
     }
 
-    fn visit_stmt(&mut self, stmt: Stmt) -> Result<Value, ()> {
+    fn visit_stmt(&mut self, stmt: Stmt) -> Result<Value, Error> {
         use Stmt::*;
         match stmt {
             Assignment(Value::Named(name), expr) => {
@@ -39,7 +41,7 @@ impl SlowInterpreter {
         }
     }
 
-    fn visit_call(&mut self, name: Value, args: Vec<Expr>) -> Result<Value, ()> {
+    fn visit_call(&mut self, name: Value, args: Vec<Expr>) -> Result<Value, Error> {
         if let Value::Named(name) = name {
             if let Some(_func) = self.globals.lookup(&name) {
                 unimplemented!("no user defined functions yet");
@@ -51,7 +53,7 @@ impl SlowInterpreter {
                     }
                     builtin::run(&name, evaled_args)
                 } else {
-                    Err(())
+                    Err(UndefinedVar(name.to_owned()).into())
                 }
             }
         } else {
@@ -59,14 +61,14 @@ impl SlowInterpreter {
         }
     }
 
-    fn visit_while(&mut self, expr: Expr, block: Block) -> Result<Value, ()> {
+    fn visit_while(&mut self, expr: Expr, block: Block) -> Result<Value, Error> {
         while self.visit_expr(expr.to_owned())?.into_bool() {
             self.visit_block(block.to_owned())?;
         }
         Ok(Value::None)
     }
 
-    fn visit_block(&mut self, block: Block) -> Result<Value, ()> {
+    fn visit_block(&mut self, block: Block) -> Result<Value, Error> {
         self.globals.push();
         for stmt in block.stmts {
             self.visit_stmt(stmt.to_owned())?;
@@ -75,12 +77,12 @@ impl SlowInterpreter {
         Ok(Value::None)
     }
 
-    fn visit_expr(&self, expr: Expr) -> Result<Value, ()> {
+    fn visit_expr(&self, expr: Expr) -> Result<Value, Error> {
         match expr {
             Expr::Leaf(v) => {
                 match v {
                     Value::Named(name) => {
-                        let value = self.globals.lookup(&name).ok_or(())?;
+                        let value = self.globals.lookup(&name).ok_or(UndefinedVar(name.to_owned()))?;
                         Ok(value.clone())
                     }
                     _ => Ok(v)
@@ -94,7 +96,7 @@ impl SlowInterpreter {
         }
     }
 
-    fn visit_op(&self, lhs: Value, op: Op, rhs: Value) -> Result<Value, ()> {
+    fn visit_op(&self, lhs: Value, op: Op, rhs: Value) -> Result<Value, Error> {
         match op {
             Op::Add => lhs.try_add(&rhs),
             Op::Sub => lhs.try_sub(&rhs),
@@ -114,56 +116,56 @@ impl SlowInterpreter {
         }
     }
 
-    fn infer(&mut self, tokens: &TokenStream) -> Result<Value, ()> {
+    fn infer(&mut self, tokens: &TokenStream) -> Result<Value, Error> {
         if let Some(tok) = tokens.first() {
             match tok.kind {
                 TokenKind::Literal { .. } => {
-                    let expr = Expr::from_tokens(&tokens).map_err(|_| ())?;
+                    let expr = Expr::from_tokens(&tokens)?;
                     self.visit_expr(expr)
                 }
                 TokenKind::Identifier => {
                     if STMT_START.contains(&tok.literal.as_str()) {
-                        let stmt = Stmt::from_tokens(&tokens).map_err(|_| ())?;
+                        let stmt = Stmt::from_tokens(&tokens)?;
                         self.visit_stmt(stmt)
                     } else if let Some(next) = tokens.second() {
                         match next.kind {
                             _ if next.kind.is_operator() => {
-                                let expr = Expr::from_tokens(&tokens).map_err(|_| ())?;
+                                let expr = Expr::from_tokens(&tokens)?;
                                 self.visit_expr(expr)
                             }
                             TokenKind::Eq => {
-                                let assign = Stmt::from_tokens(&tokens).map_err(|_| ())?;
+                                let assign = Stmt::from_tokens(&tokens)?;
                                 self.visit_stmt(assign)
-                            },
+                            }
                             TokenKind::LeftParen => {
-                                let call = Stmt::from_tokens(&tokens).map_err(|_| ())?;
+                                let call = Stmt::from_tokens(&tokens)?;
                                 self.visit_stmt(call)
                             }
-                            _ => Err(())
+                            _ => Err(Unexpected(next.to_owned()).into())
                         }
                     } else {
-                        self.globals.lookup(&tok.literal).ok_or(())
+                        self.globals.lookup(&tok.literal).ok_or(UndefinedVar(tok.literal.to_owned()).into())
                     }
                 }
                 _ => {
-                    Err(())
+                    Err(Unexpected(tok.to_owned()).into())
                 }
             }
         } else {
-            Err(())
+            panic!("EOF?")
         }
     }
 }
 
 impl Interpreter for SlowInterpreter {
-    fn eval_line(&mut self, input: &str) -> Result<Value, ()> {
+    fn eval_line(&mut self, input: &str) -> Result<Value, Error> {
         let tokens = TokenStream::new(input);
         self.infer(&tokens)
     }
 
-    fn eval_file<P: Into<PathBuf>>(&mut self, path: P) -> Result<Value, ()> {
+    fn eval_file<P: Into<PathBuf>>(&mut self, path: P) -> Result<Value, Error> {
         use std::fs;
-        let script = fs::read_to_string(path.into()).map_err(|_| ())?;
+        let script = fs::read_to_string(path.into())?;
         let tokens = TokenStream::new(script.as_str());
         while !tokens.is_empty() {
             self.infer(&tokens)?;

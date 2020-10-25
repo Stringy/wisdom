@@ -1,7 +1,9 @@
 use wisdom::ast::value::Value;
 use wisdom::interpreter::*;
+use interpreter::error::Error;
+use wisdom::interpreter::error::ErrorKind::UndefinedVar;
 
-fn run_lines(itp: &mut SlowInterpreter, lines: &[&str], expect: Result<Value, ()>) {
+fn run_lines(itp: &mut SlowInterpreter, lines: &[&str], expect: Result<Value, Error>) {
     let mut result = Ok(Value::None);
     for line in lines {
         result = itp.eval_line(line);
@@ -40,5 +42,5 @@ fn test_scope() {
         "b"
     ];
     let mut itp = SlowInterpreter::new();
-    run_lines(&mut itp, lines, Err(()));
+    run_lines(&mut itp, lines, Err(UndefinedVar("b".to_string()).into()));
 }

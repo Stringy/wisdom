@@ -5,8 +5,8 @@ use crate::value::Value;
 use std::collections::VecDeque;
 
 use crate::ext::*;
-use crate::error::{Error};
-use crate::error::ErrorKind::InvalidToken;
+use crate::error::{ParserError};
+use crate::error::ErrorKind::*;
 
 #[derive(Debug, PartialOrd, PartialEq, Clone)]
 pub enum Expr {
@@ -25,7 +25,7 @@ impl Expr {
 }
 
 impl FromTokens for Expr {
-    type Error = Error;
+    type Error = ParserError;
 
     fn from_tokens(tokens: &TokenStream) -> Result<Self, Self::Error> {
         let mut operators: VecDeque<Op> = VecDeque::new();
@@ -43,7 +43,9 @@ impl FromTokens for Expr {
                     // recurse to calculate the sub-expression
                     operands.push_back(Expr::from_tokens(tokens)?);
 
-                    tokens.expect(TokenKind::RightParen).ok_or(Error::from(InvalidToken))?;
+                    tokens.expect(TokenKind::RightParen).ok_or(
+                        ParserError::new(TokenKind::RightParen, tokens.position())
+                    )?;
                 }
                 _ if tok.kind.is_operator() => {
                     let op = Op::from_tokens(tokens)?;
@@ -53,7 +55,9 @@ impl FromTokens for Expr {
                             operators.push_back(op);
                         } else {
                             // construct a tree
-                            let (rhs, lhs) = operands.pop_back_two().ok_or(Error::from(InvalidToken))?;
+                            let (rhs, lhs) = operands.pop_back_two().ok_or(
+                                ParserError::new(UnmatchedExpr, Some(tok.position))
+                            )?;
                             operands.push_back(Expr::new_tree(lhs, op, rhs));
                         }
                     } else {
@@ -72,13 +76,13 @@ impl FromTokens for Expr {
         }
 
         while operators.len() > 0 {
-            let op = operators.pop_back().ok_or(Error::from(InvalidToken))?;
-            let (rhs, lhs) = operands.pop_back_two().ok_or(Error::from(InvalidToken))?;
+            let op = operators.pop_back().ok_or(ParserError::new(UnmatchedExpr, tokens.position()))?;
+            let (rhs, lhs) = operands.pop_back_two().ok_or(ParserError::new(UnmatchedExpr, tokens.position()))?;
             let tree = Expr::new_tree(lhs, op, rhs);
             operands.push_back(tree);
         }
 
-        Ok(operands.pop_back().ok_or(Error::from(InvalidToken))?)
+        Ok(operands.pop_back().ok_or(ParserError::new(UnmatchedExpr, tokens.position()))?)
     }
 }
 
