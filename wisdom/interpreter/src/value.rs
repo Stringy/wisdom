@@ -28,23 +28,23 @@ impl Operations for Value {
                 match rhs {
                     Value::Int(m) => Ok(Value::Int(n + m)),
                     Value::Float(m) => Ok(Value::Float(*n as f64 + m)),
-                    _ => Err(InvalidType.into())
+                    _ => Err(Error::new(InvalidType))
                 }
             }
             Value::Float(n) => {
                 match rhs {
                     Value::Int(m) => Ok(Value::Float(n + *m as f64)),
                     Value::Float(m) => Ok(Value::Float(n + m)),
-                    _ => Err(InvalidType.into())
+                    _ => Err(Error::new(InvalidType))
                 }
             }
             Value::String(n) => {
                 match rhs {
                     Value::String(m) => Ok(Value::String((n.to_owned() + m).to_owned())),
-                    _ => Err(InvalidType.into())
+                    _ => Err(Error::new(InvalidType))
                 }
             }
-            _ => Err(InvalidType.into())
+            _ => Err(Error::new(InvalidType))
         }
     }
 
@@ -54,17 +54,17 @@ impl Operations for Value {
                 match rhs {
                     Value::Int(m) => Ok(Value::Int(n - m)),
                     Value::Float(m) => Ok(Value::Float(*n as f64 - m)),
-                    _ => Err(InvalidType.into())
+                    _ => Err(Error::new(InvalidType))
                 }
             }
             Value::Float(n) => {
                 match rhs {
                     Value::Int(m) => Ok(Value::Float(n - *m as f64)),
                     Value::Float(m) => Ok(Value::Float(n - m)),
-                    _ => Err(InvalidType.into())
+                    _ => Err(Error::new(InvalidType))
                 }
             }
-            _ => Err(InvalidType.into())
+            _ => Err(Error::new(InvalidType))
         }
     }
 
@@ -74,17 +74,17 @@ impl Operations for Value {
                 match rhs {
                     Value::Int(m) => Ok(Value::Int(n * m)),
                     Value::Float(m) => Ok(Value::Float(*n as f64 * m)),
-                    _ => Err(InvalidType.into())
+                    _ => Err(Error::new(InvalidType))
                 }
             }
             Value::Float(n) => {
                 match rhs {
                     Value::Int(m) => Ok(Value::Float(n * *m as f64)),
                     Value::Float(m) => Ok(Value::Float(n * m)),
-                    _ => Err(InvalidType.into())
+                    _ => Err(Error::new(InvalidType))
                 }
             }
-            _ => Err(InvalidType.into())
+            _ => Err(Error::new(InvalidType))
         }
     }
 
@@ -94,17 +94,17 @@ impl Operations for Value {
                 match rhs {
                     Value::Int(m) => Ok(Value::Float(*n as f64 / *m as f64)),
                     Value::Float(m) => Ok(Value::Float(*n as f64 / m)),
-                    _ => Err(InvalidType.into())
+                    _ => Err(Error::new(InvalidType))
                 }
             }
             Value::Float(n) => {
                 match rhs {
                     Value::Int(m) => Ok(Value::Float(n / *m as f64)),
                     Value::Float(m) => Ok(Value::Float(n / m)),
-                    _ => Err(InvalidType.into())
+                    _ => Err(Error::new(InvalidType))
                 }
             }
-            _ => Err(InvalidType.into())
+            _ => Err(Error::new(InvalidType))
         }
     }
 
@@ -133,10 +133,10 @@ impl Operations for Value {
             Value::Int(n) => {
                 match rhs {
                     Value::Int(m) => Ok(Value::Int(n ^ m)),
-                    _ => Err(InvalidType.into())
+                    _ => Err(Error::new(InvalidType))
                 }
             }
-            _ => Err(InvalidType.into())
+            _ => Err(Error::new(InvalidType))
         }
     }
 
@@ -145,10 +145,10 @@ impl Operations for Value {
             Value::Int(n) => {
                 match rhs {
                     Value::Int(m) => Ok(Value::Int(n & m)),
-                    _ => Err(InvalidType.into())
+                    _ => Err(Error::new(InvalidType))
                 }
             }
-            _ => Err(InvalidType.into())
+            _ => Err(Error::new(InvalidType))
         }
     }
 
@@ -157,10 +157,10 @@ impl Operations for Value {
             Value::Int(n) => {
                 match rhs {
                     Value::Int(m) => Ok(Value::Int(n | m)),
-                    _ => Err(InvalidType.into())
+                    _ => Err(Error::new(InvalidType))
                 }
             }
-            _ => Err(InvalidType.into())
+            _ => Err(Error::new(InvalidType))
         }
     }
 

@@ -1,14 +1,39 @@
-use std::fmt::{Debug, Formatter, Display};
-use std::fmt;
-use tokenizer::{Position, TokenKind};
+use std::fmt::{Debug};
 
-#[derive(PartialOrd, PartialEq, Debug, Clone)]
+use common::{Describable, Position, WisdomError};
+use tokenizer::TokenKind;
+
+#[derive(PartialOrd, PartialEq, Debug, Clone, Copy)]
 pub struct ParserError {
     pub kind: ErrorKind,
     pub position: Option<Position>,
 }
 
-#[derive(PartialOrd, PartialEq, Debug, Clone)]
+impl Describable for ParserError {
+    fn description(&self) -> String {
+        match self.kind {
+            ErrorKind::InvalidToken(tok) => format!("invalid token: {:?}", tok),
+            ErrorKind::InvalidLit => format!("invalid literal"),
+            ErrorKind::UnexpectedEOL => format!("unexpected end-of-line"),
+            ErrorKind::UnmatchedExpr => format!("unmatched expression. Probably contains too many operators, or too few operands"),
+            ErrorKind::ExpectedOperator => format!("expected operator, but didn't find one"),
+            ErrorKind::ExpectedIdent(ident) => format!("expected '{}'", ident),
+            ErrorKind::ExpectSemiColon => format!("expected semi-colon"),
+            ErrorKind::ExpectedTokens(tokens) => {
+                // TODO: make ExpectedTokens description not a debug thing
+                format!("expected one of {:?}", tokens)
+            }
+        }
+    }
+}
+
+impl WisdomError for ParserError {
+    fn position(&self) -> Position {
+        self.position.unwrap_or_default()
+    }
+}
+
+#[derive(PartialOrd, PartialEq, Debug, Clone, Copy)]
 pub enum ErrorKind {
     InvalidToken(TokenKind),
     InvalidLit,
@@ -17,7 +42,7 @@ pub enum ErrorKind {
     ExpectedOperator,
     ExpectedIdent(&'static str),
     ExpectSemiColon,
-    ExpectedTokens(Vec<TokenKind>),
+    ExpectedTokens(&'static [TokenKind]),
 }
 
 impl From<TokenKind> for ErrorKind {
@@ -26,25 +51,11 @@ impl From<TokenKind> for ErrorKind {
     }
 }
 
-impl From<Vec<TokenKind>> for ErrorKind {
-    fn from(ts: Vec<TokenKind>) -> Self {
-        Self::ExpectedTokens(ts)
-    }
-}
-
 impl ParserError {
     pub fn new<K: Into<ErrorKind>>(kind: K, position: Option<Position>) -> Self {
         Self {
             kind: kind.into(),
-            position
+            position,
         }
     }
 }
-
-impl Display for ParserError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "{:?}", self)
-    }
-}
-
-impl std::error::Error for ParserError {}

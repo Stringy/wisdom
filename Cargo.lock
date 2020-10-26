@@ -13,6 +13,7 @@ dependencies = [
 name = "ast"
 version = "0.1.0"
 dependencies = [
+ "common",
  "tokenizer",
 ]
 
@@ -49,6 +50,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "common"
+version = "0.1.0"
+
+[[package]]
 name = "hermit-abi"
 version = "0.1.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -62,6 +67,7 @@ name = "interpreter"
 version = "0.1.0"
 dependencies = [
  "ast",
+ "common",
  "tokenizer",
 ]
 
@@ -95,6 +101,9 @@ dependencies = [
 [[package]]
 name = "tokenizer"
 version = "0.1.0"
+dependencies = [
+ "common",
+]
 
 [[package]]
 name = "unicode-width"
@@ -144,6 +153,7 @@ name = "wisdom"
 version = "0.1.0"
 dependencies = [
  "ast",
+ "common",
  "interpreter",
  "tokenizer",
 ]

@@ -1,6 +1,8 @@
 use std::collections::VecDeque;
-use crate::{Token, tokenize, TokenKind, Position};
 use std::cell::RefCell;
+
+use common::Position;
+use crate::{Token, tokenize, TokenKind};
 use crate::TokenKind::Whitespace;
 
 ///
@@ -132,7 +134,8 @@ impl TokenStream {
     /// Look ahead at the next `Token` without consuming it.
     ///
     /// ```
-    /// use tokenizer::{TokenStream, Token, TokenKind, Position, LiteralKind, Base};
+    /// use tokenizer::{TokenStream, Token, TokenKind, LiteralKind, Base};
+    /// use common::Position;
     ///
     /// let mut tokens = TokenStream::new("1+1");
     /// let tok = Some(Token {

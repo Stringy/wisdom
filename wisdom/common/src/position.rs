@@ -1,15 +1,12 @@
-use std::fmt::{Display, Formatter};
+use std::fmt::Display;
 use std::fmt;
 
 ///
-/// Position represents a location within a source file
-/// or source code.
+/// A position describes a place in the source code.
 ///
 #[derive(Copy, Clone, PartialOrd, PartialEq, Debug)]
 pub struct Position {
-    /// The line number. Always greater than zero.
     pub line: usize,
-    /// The column offset into the line. Always greater than zero.
     pub column: usize,
 }
 
@@ -23,7 +20,7 @@ impl Default for Position {
 }
 
 impl Display for Position {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}:{}", self.line, self.column)
     }
 }

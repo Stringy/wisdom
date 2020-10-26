@@ -7,12 +7,10 @@ use std::io::{Write, BufReader};
 
 use wisdom::interpreter::{Interpreter, SlowInterpreter};
 use wisdom::ast::value::Value;
-use wisdom::interpreter::error::{Error, ErrorKind};
+use wisdom::interpreter::error::{Error};
 use std::io::{self, BufRead};
 use std::fs::File;
-use wisdom::ast::error::ParserError;
-use wisdom::interpreter::error::ErrorKind::Parser;
-use wisdom::tokenizer::Position;
+use wisdom::common::{Position, Describable, WisdomError};
 
 fn do_write(msg: &str) {
     std::io::stdout().write(msg.as_bytes()).unwrap();
@@ -31,53 +29,25 @@ fn get_line(filename: &str, line: usize) -> io::Result<String> {
     reader.lines().nth(line).unwrap_or(Err(io::ErrorKind::NotFound.into()))
 }
 
-fn handle_parser_error_with_line(pe: ParserError, line: String) {
-    use wisdom::ast::error::ErrorKind::*;
-    let pos = pe.position.unwrap_or(Position { line: 1, column: line.len() });
-
-    match pe.kind {
-        InvalidToken(kind) => do_write(format!("invalid token {:?}", kind).as_str()),
-        InvalidLit => do_write("invalid literal"),
-        UnexpectedEOL => do_write("unexpected EOL"),
-        UnmatchedExpr => do_write("unmatched expression"),
-        ExpectedOperator => do_write("expected operator"),
-        ExpectedIdent(ident) => do_write(format!("expected ident '{}'", ident).as_str()),
-        ExpectSemiColon => do_write("expected semi-colon"),
-        ExpectedTokens(tokens) => do_write(format!("expected one of: {:?}", tokens).as_str())
-    }
-
-    do_write("\n\n\t");
+fn handle_err_with_line(desc: String, pos: Position, line: String) {
+    do_write(format!("{}\n\n    ", desc).as_str());
     do_write(line.as_str());
-    do_write("\t");
+    do_write("\n    ");
     do_write(" ".repeat(pos.column - 1).as_str());
     do_write("^");
-    do_write("\n\t");
+    do_write("\n    ");
     do_write("-".repeat(pos.column - 1).as_str());
     do_write("|\n");
 }
 
-fn handle_parser_error(pe: ParserError, filename: &str) {
-    if let Some(pos) = pe.position {
-        if let Ok(line) = get_line(filename, pos.line - 1) {
-            handle_parser_error_with_line(pe, line);
-        } else {
-            panic!("Error occurred when handling an error. Damn.")
-        }
-    }
-}
 
 fn handle(err: Error, filename: &str) {
-    let kind = err.kind;
-    match kind {
-        ErrorKind::Parser(pe) => handle_parser_error(pe, filename),
-        ErrorKind::UndefinedVar(_name) => {}
-        ErrorKind::Unexpected(_token) => {}
-        ErrorKind::InvalidType => {
-            do_write("invalid type for operation\n");
-        }
-        ErrorKind::IOError(io) => {
-            do_write(format!("failed to open file: {:?}", io).as_str());
-        }
+    let position = err.position();
+    if let Ok(line) = get_line(filename, position.line - 1) {
+        do_write(format!("{}:{}:{}\n", filename, position.line, position.column).as_str());
+        handle_err_with_line(err.description(), position, line);
+    } else {
+        panic!("Error occurred when handling an error. Damn.")
     }
 }
 
@@ -120,11 +90,7 @@ fn main() {
                         }
                     }
                     Err(e) => {
-                        if let Parser(pe) = e.kind {
-                            handle_parser_error_with_line(pe, line);
-                        } else {
-                            do_write(format!("{}\n", e).as_str());
-                        }
+                        do_write(format!("{}\n", e.description()).as_str())
                     }
                 }
             }

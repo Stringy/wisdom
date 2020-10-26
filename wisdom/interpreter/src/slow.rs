@@ -19,7 +19,7 @@ pub struct SlowInterpreter {
 impl SlowInterpreter {
     pub fn new() -> Self {
         Self {
-            globals: Context::new()
+            globals: Context::new(),
         }
     }
 
@@ -53,7 +53,7 @@ impl SlowInterpreter {
                     }
                     builtin::run(&name, evaled_args)
                 } else {
-                    Err(UndefinedVar(name.to_owned()).into())
+                    Err(Error::new(UndefinedVar(name.to_owned())))
                 }
             }
         } else {
@@ -82,7 +82,7 @@ impl SlowInterpreter {
             Expr::Leaf(v) => {
                 match v {
                     Value::Named(name) => {
-                        let value = self.globals.lookup(&name).ok_or(UndefinedVar(name.to_owned()))?;
+                        let value = self.globals.lookup(&name).ok_or(Error::new(UndefinedVar(name.to_owned())))?;
                         Ok(value.clone())
                     }
                     _ => Ok(v)
@@ -141,14 +141,14 @@ impl SlowInterpreter {
                                 let call = Stmt::from_tokens(&tokens)?;
                                 self.visit_stmt(call)
                             }
-                            _ => Err(Unexpected(next.to_owned()).into())
+                            _ => Err(Error::new(Unexpected(next.to_owned())))
                         }
                     } else {
-                        self.globals.lookup(&tok.literal).ok_or(UndefinedVar(tok.literal.to_owned()).into())
+                        self.globals.lookup(&tok.literal).ok_or(Error::new(UndefinedVar(tok.literal.to_owned())))
                     }
                 }
                 _ => {
-                    Err(Unexpected(tok.to_owned()).into())
+                    Err(Error::new(Unexpected(tok.to_owned())))
                 }
             }
         } else {
@@ -157,7 +157,7 @@ impl SlowInterpreter {
     }
 }
 
-impl Interpreter for SlowInterpreter {
+impl Interpreter<Error> for SlowInterpreter {
     fn eval_line(&mut self, input: &str) -> Result<Value, Error> {
         let tokens = TokenStream::new(input);
         self.infer(&tokens)

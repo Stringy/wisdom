@@ -42,5 +42,5 @@ fn test_scope() {
         "b"
     ];
     let mut itp = SlowInterpreter::new();
-    run_lines(&mut itp, lines, Err(UndefinedVar("b".to_string()).into()));
+    run_lines(&mut itp, lines, Err(Error::new(UndefinedVar("b".to_string()))));
 }

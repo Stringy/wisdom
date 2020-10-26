@@ -10,3 +10,4 @@ edition = "2018"
 ast = { path = "ast" }
 tokenizer = { path = "tokenizer" }
 interpreter = { path = "interpreter" }
+common = { path = "common" }

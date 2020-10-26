@@ -1,4 +1,4 @@
-use crate::Position;
+use common::Position;
 
 ///
 /// A Token defines a distinct entity within an input

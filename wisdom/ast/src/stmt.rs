@@ -57,7 +57,7 @@ impl Stmt {
             let variable = Value::Named(literal.to_owned());
 
             let maybe_in = tokens.expect(TokenKind::Identifier).ok_or(
-                ParserError::new(ExpectedTokens(vec![TokenKind::Identifier]), tokens.position())
+                ParserError::new(ExpectedTokens(&[TokenKind::Identifier]), tokens.position())
             )?;
 
             if maybe_in.literal != "in" {
@@ -82,10 +82,10 @@ impl Stmt {
     fn binding_from_tokens(tokens: &TokenStream) -> Result<Self, ParserError> {
         tokens.consume(); // consume let
         let name = tokens.expect(TokenKind::Identifier).ok_or(
-            ParserError::new(ExpectedTokens(vec![TokenKind::Identifier]), tokens.position())
+            ParserError::new(ExpectedTokens(&[TokenKind::Identifier]), tokens.position())
         )?;
         tokens.expect(TokenKind::Eq).ok_or(
-            ParserError::new(ExpectedTokens(vec![TokenKind::Eq]), tokens.position())
+            ParserError::new(ExpectedTokens(&[TokenKind::Eq]), tokens.position())
         )?;
         let expr = Expr::from_tokens(tokens)?;
         Ok(Self::Binding(Value::Named(name.literal.to_owned()), expr))
@@ -93,11 +93,11 @@ impl Stmt {
 
     fn assignment_from_tokens(tokens: &TokenStream) -> Result<Self, ParserError> {
         let name = tokens.expect(TokenKind::Identifier).ok_or(
-            ParserError::new(ExpectedTokens(vec![TokenKind::Identifier]), tokens.position())
+            ParserError::new(ExpectedTokens(&[TokenKind::Identifier]), tokens.position())
         )?;
 
         tokens.expect(TokenKind::Eq).ok_or(
-            ParserError::new(ExpectedTokens(vec![TokenKind::Eq]), tokens.position())
+            ParserError::new(ExpectedTokens(&[TokenKind::Eq]), tokens.position())
         )?;
 
         let expr = Expr::from_tokens(tokens)?;
@@ -113,7 +113,7 @@ impl Stmt {
         )?;
 
         tokens.expect(TokenKind::LeftParen).ok_or(
-            ParserError::new(ExpectedTokens(vec![TokenKind::LeftParen]), tokens.position())
+            ParserError::new(ExpectedTokens(&[TokenKind::LeftParen]), tokens.position())
         )?;
 
         let mut exprs = Vec::new();
@@ -133,7 +133,7 @@ impl Stmt {
         }
 
         tokens.expect(TokenKind::RightParen).ok_or(
-            ParserError::new(ExpectedTokens(vec![TokenKind::RightParen]), tokens.position())
+            ParserError::new(ExpectedTokens(&[TokenKind::RightParen]), tokens.position())
         )?;
 
         tokens.expect(TokenKind::SemiColon).ok_or(

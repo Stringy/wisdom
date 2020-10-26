@@ -8,3 +8,4 @@ edition = "2018"
 
 [dependencies]
 tokenizer = { path = "../tokenizer" }
+common = { path = "../common" }

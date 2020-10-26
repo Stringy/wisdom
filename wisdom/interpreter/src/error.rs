@@ -1,18 +1,37 @@
-use ast::error::ParserError;
-use tokenizer::Token;
 use std::fmt::{Display, Formatter};
 use std::fmt;
 
+use ast::error::ParserError;
+use common::{Describable, WisdomError, Position};
+use tokenizer::Token;
+
 #[derive(PartialEq, Debug, Clone)]
 pub struct Error {
-    pub kind: ErrorKind
+    pub kind: ErrorKind,
+    pub position: Position,
 }
-
-impl Error {}
 
 impl Display for Error {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.kind)
+        write!(f, "{}", self.description())
+    }
+}
+
+impl Describable for Error {
+    fn description(&self) -> String {
+        match &self.kind {
+            ErrorKind::Parser(p) => p.description(),
+            ErrorKind::UndefinedVar(name) => format!("Undefined variable '{}'", name),
+            ErrorKind::Unexpected(tok) => format!("Unexpected token '{:?}'", tok.kind),
+            ErrorKind::InvalidType => format!("Invalid type in expression"),
+            ErrorKind::IOError(io) => format!("IO Error: {}", io),
+        }
+    }
+}
+
+impl WisdomError for Error {
+    fn position(&self) -> Position {
+        self.position
     }
 }
 
@@ -22,51 +41,34 @@ pub enum ErrorKind {
     UndefinedVar(String),
     Unexpected(Token),
     InvalidType,
-    IOError(std::io::ErrorKind),
-}
-
-impl Display for ErrorKind {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        match self {
-            ErrorKind::Parser(p) => {
-                write!(f, "{}", p)
-            }
-            ErrorKind::UndefinedVar(n) => {
-                write!(f, "Undefined variable '{}'", n)
-            }
-            ErrorKind::Unexpected(t) => {
-                write!(f, "Unexpected token '{}' at {}", t.literal, t.position)
-            }
-            ErrorKind::InvalidType => {
-                write!(f, "Invalid type in expression")
-            }
-            ErrorKind::IOError(i) => {
-                write!(f, "IO Error: {:?}", i)
-            }
-        }
-    }
+    IOError(String),
 }
 
 impl From<ParserError> for Error {
     fn from(p: ParserError) -> Self {
         Self {
-            kind: ErrorKind::Parser(p)
+            kind: ErrorKind::Parser(p),
+            position: p.position(),
         }
     }
 }
 
 impl From<std::io::Error> for Error {
-    fn from(i: std::io::Error) -> Self {
+    fn from(io: std::io::Error) -> Self {
         Self {
-            kind: ErrorKind::IOError(i.kind())
+            kind: ErrorKind::IOError(io.to_string()),
+            position: Default::default()
         }
     }
 }
 
-impl From<ErrorKind> for Error {
-    fn from(e: ErrorKind) -> Self {
+impl Error {
+    pub fn new(kind: ErrorKind) -> Self {
         Self {
-            kind: e
+            kind,
+            // TODO: update to use an actual position
+            position: Default::default(),
         }
     }
 }
+

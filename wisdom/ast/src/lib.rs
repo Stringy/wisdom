@@ -9,4 +9,5 @@ pub mod keywords;
 
 mod ext;
 
+extern crate common;
 extern crate tokenizer;
