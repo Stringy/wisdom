@@ -11,3 +11,4 @@ default-run = "welp"
 lazy_static = "1.4.0"
 wisdom = { path = "../wisdom" }
 clap = "2.33.0"
+rustyline = "8.0.0"

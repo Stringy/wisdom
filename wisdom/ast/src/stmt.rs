@@ -39,7 +39,7 @@ impl FromTokens for Stmt {
                     }
                 }
             }
-            _ => Err(ParserError::new(UnexpectedEOL, None))
+            _ => Err(ParserError::new(UnexpectedEOL, Some(first.position)))
         }
     }
 }

@@ -25,6 +25,7 @@ impl Describable for Error {
             ErrorKind::Unexpected(tok) => format!("Unexpected token '{:?}'", tok.kind),
             ErrorKind::InvalidType => format!("Invalid type in expression"),
             ErrorKind::IOError(io) => format!("IO Error: {}", io),
+            ErrorKind::UnexpectedArgs(exp, act) => format!("Expected {} args, got {}", exp, act),
         }
     }
 }
@@ -42,6 +43,7 @@ pub enum ErrorKind {
     Unexpected(Token),
     InvalidType,
     IOError(String),
+    UnexpectedArgs(usize, usize),
 }
 
 impl From<ParserError> for Error {
@@ -57,7 +59,7 @@ impl From<std::io::Error> for Error {
     fn from(io: std::io::Error) -> Self {
         Self {
             kind: ErrorKind::IOError(io.to_string()),
-            position: Default::default()
+            position: Default::default(),
         }
     }
 }

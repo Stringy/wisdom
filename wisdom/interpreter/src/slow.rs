@@ -11,6 +11,7 @@ use crate::scope::Context;
 use crate::{Interpreter, builtin, Error};
 use crate::error::ErrorKind::*;
 use crate::value::Operations;
+use ast::func::Function;
 
 pub struct SlowInterpreter {
     globals: Context,
@@ -43,8 +44,30 @@ impl SlowInterpreter {
 
     fn visit_call(&mut self, name: Value, args: Vec<Expr>) -> Result<Value, Error> {
         if let Value::Named(name) = name {
-            if let Some(_func) = self.globals.lookup(&name) {
-                unimplemented!("no user defined functions yet");
+            if let Some(func) = self.globals.lookup(&name) {
+                if let Value::Func(func) = func {
+                    if func.args.len() != args.len() {
+                        return Err(Error::new(UnexpectedArgs(func.args.len(), args.len())));
+                    }
+
+                    for (i, arg) in args.iter().enumerate() {
+                        self.globals.store(
+                            func.args.get(i).unwrap().name.to_owned(),
+                            self.visit_expr(arg.to_owned())?,
+                        );
+                    }
+
+                    self.globals.push();
+                    let mut result = Value::None;
+                    for stmt in func.body {
+                        result = self.visit_stmt(stmt)?;
+                    }
+                    self.globals.pop();
+
+                    Ok(result)
+                } else {
+                    Err(Error::new(InvalidType))
+                }
             } else {
                 if builtin::exists(&name) {
                     let mut evaled_args = Vec::new();
@@ -127,6 +150,10 @@ impl SlowInterpreter {
                     if STMT_START.contains(&tok.literal.as_str()) {
                         let stmt = Stmt::from_tokens(&tokens)?;
                         self.visit_stmt(stmt)
+                    } else if tok.literal == "fn" {
+                        let func = Function::from_tokens(&tokens)?;
+                        self.globals.store(func.name.clone(), Value::Func(func));
+                        Ok(Value::None)
                     } else if let Some(next) = tokens.second() {
                         match next.kind {
                             _ if next.kind.is_operator() => {

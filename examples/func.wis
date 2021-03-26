@@ -1,0 +1,12 @@
+fn foo() {
+    print("Hello, world");
+}
+
+fn bar(a, b) {
+    print(a + b);
+}
+
+a = 1;
+foo();
+bar(5, 2);
+

@@ -6,6 +6,7 @@ pub mod value;
 pub mod stmt;
 pub mod block;
 pub mod keywords;
+pub mod func;
 
 mod ext;
 

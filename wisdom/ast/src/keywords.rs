@@ -3,5 +3,5 @@ pub const STMT_START: &[&'static str] = &[
 ];
 
 pub const KEYWORDS: &[&'static str] = &[
-    "let", "for", "while", "return", "in"
+    "let", "for", "while", "return", "in", "fn"
 ];

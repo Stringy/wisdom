@@ -4,15 +4,49 @@ use crate::error::{ParserError};
 use crate::error::ErrorKind::{UnexpectedEOL, InvalidLit};
 use std::fmt::{Display, Formatter};
 use std::fmt;
+use crate::func::Function;
+use std::cmp::Ordering;
 
-#[derive(Clone, Debug, PartialOrd, PartialEq)]
+#[derive(Clone, Debug)]
 pub enum Value {
     Int(i64),
     Float(f64),
     Bool(bool),
     String(String),
     Named(String),
+    Func(Function),
     None,
+}
+
+impl PartialEq for Value {
+    fn eq(&self, other: &Self) -> bool {
+        use Value::*;
+        match (self, other) {
+            (Int(n), Int(m)) => n == m,
+            (Int(n), Float(m)) => *n as f64 == *m,
+            (Float(n), Int(m)) => *n == *m as f64,
+            (Bool(n), Bool(m)) => n == m,
+            (String(n), String(m)) => n == m,
+            (Named(n), Named(m)) => n == m,
+            (Func(n), Func(m)) => n.name == m.name,
+            _ => false
+        }
+    }
+}
+
+impl PartialOrd for Value {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        use Value::*;
+        match (self, other) {
+            (Int(n), Int(m)) => n.partial_cmp(m),
+            (Int(n), Float(m)) => (*n as f64).partial_cmp(m),
+            (Float(n), Int(m)) => n.partial_cmp(&(*m as f64)),
+            (Bool(n), Bool(m)) => n.partial_cmp(m),
+            (String(n), String(m)) => n.partial_cmp(m),
+            (Named(n), Named(m)) => n.partial_cmp(m),
+            _ => Option::None
+        }
+    }
 }
 
 impl Display for Value {
@@ -23,6 +57,7 @@ impl Display for Value {
             Value::Bool(n) => write!(f, "{}", n),
             Value::String(n) => write!(f, "{}", n),
             Value::Named(n) => write!(f, "{}", n),
+            Value::Func(func) => write!(f, "{}", func),
             Value::None => write!(f, "none")
         }
     }

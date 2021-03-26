@@ -1,5 +1,6 @@
 extern crate wisdom;
 extern crate clap;
+extern crate rustyline;
 
 use clap::{Arg, App};
 
@@ -11,6 +12,7 @@ use wisdom::interpreter::error::{Error};
 use std::io::{self, BufRead};
 use std::fs::File;
 use wisdom::common::{Position, Describable, WisdomError};
+use rustyline::Editor;
 
 fn do_write(msg: &str) {
     std::io::stdout().write(msg.as_bytes()).unwrap();
@@ -54,6 +56,7 @@ fn handle(err: Error, filename: &str) {
 // TODO: support reading from file
 fn main() {
     let mut interp = SlowInterpreter::new();
+    let mut rl = Editor::<()>::new();
     let args = App::new("WELP")
         .version("0.1")
         .author("Giles Hutton")
@@ -74,23 +77,34 @@ fn main() {
             }
         }
         None => {
+            use rustyline::error::ReadlineError::*;
             do_write("Wisdom REPL (WELP) v1.0\n");
             loop {
-                do_write(">>> ");
-                let line = get_input();
+                let input = rl.readline(">>> ");
+                match input {
+                    Ok(line) => {
+                        if line == "\n" || line.is_empty() {
+                            continue;
+                        }
 
-                if line == "\n" {
-                    continue;
-                }
-
-                match interp.eval_line(line.as_str()) {
-                    Ok(v) => {
-                        if v != Value::None {
-                            do_write(format!("{}\n", v).as_str())
+                        match interp.eval_line(line.as_str()) {
+                            Ok(v) => {
+                                if v != Value::None {
+                                    do_write(format!("{}\n", v).as_str())
+                                }
+                            }
+                            Err(e) => {
+                                do_write(format!("{}\n", e.description()).as_str())
+                            }
                         }
                     }
-                    Err(e) => {
-                        do_write(format!("{}\n", e.description()).as_str())
+                    Err(Interrupted) | Err(Eof) => {
+                        do_write("Exiting.\n");
+                        break;
+                    }
+                    Err(err) => {
+                        do_write(format!("Input error: {}\n", err).as_str());
+                        break;
                     }
                 }
             }
