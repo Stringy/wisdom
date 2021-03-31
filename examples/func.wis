@@ -4,9 +4,11 @@ fn foo() {
 
 fn bar(a, b) {
     print(a + b);
+    print(a + b);
 }
 
 a = 1;
 foo();
 bar(5, 2);
 
+print(foo, " ", bar);

@@ -18,6 +18,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "ast2"
+version = "0.1.0"
+dependencies = [
+ "common",
+]
+
+[[package]]
 name = "atty"
 version = "0.2.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -180,6 +187,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "parser"
+version = "0.1.0"
+dependencies = [
+ "ast2",
+]
+
+[[package]]
 name = "radix_trie"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -334,5 +348,6 @@ dependencies = [
  "ast",
  "common",
  "interpreter",
+ "parser",
  "tokenizer",
 ]

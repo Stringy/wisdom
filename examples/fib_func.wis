@@ -1,0 +1,16 @@
+fn fib(n) {
+    a = 1;
+    b = 1;
+
+    while n > 0 {
+        tmp = a + b;
+        a = b;
+        b = tmp;
+        n = n - 1;
+    }
+
+    print(b);
+}
+
+fib(10);
+fib(20);

@@ -9,6 +9,7 @@ pub mod keywords;
 pub mod func;
 
 mod ext;
+mod ast;
 
 extern crate common;
 extern crate tokenizer;

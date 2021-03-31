@@ -11,3 +11,4 @@ ast = { path = "ast" }
 tokenizer = { path = "tokenizer" }
 interpreter = { path = "interpreter" }
 common = { path = "common" }
+parser = { path = "parser" }
