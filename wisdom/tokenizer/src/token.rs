@@ -33,6 +33,7 @@ pub enum TokenKind {
     Eq,
     SemiColon,
     Comma,
+    Colon,
     LeftParen,
     RightParen,
     LeftBrace,

@@ -1,32 +1,39 @@
 mod stmt;
 mod expr;
 mod func;
+mod operation;
+mod error;
+mod ext;
 
 pub use stmt::*;
 pub use expr::*;
 pub use func::*;
-use common::Span;
+pub use operation::*;
+
+use common::{Span, Position};
+use tokenizer::Token;
 
 extern crate common;
+extern crate tokenizer;
 
 pub type NodeId = u32;
 
+#[derive(Clone)]
 pub struct Ident {
-    pub span: Span,
+    pub position: Position,
     pub name: String,
 }
 
+impl From<&Token> for Ident {
+    fn from(t: &Token) -> Self {
+        Self {
+            position: t.position.clone(),
+            name: t.literal.clone(),
+        }
+    }
+}
+
+#[derive(Clone)]
 pub struct Typ {
     pub ident: Ident
-}
-
-pub struct Item<K = ItemKind> {
-    pub node_id: NodeId,
-    pub kind: K,
-}
-
-pub enum ItemKind {
-    Fn(Function),
-    Stmt(Stmt),
-    Expr(Expr),
 }

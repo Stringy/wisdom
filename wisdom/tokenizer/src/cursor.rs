@@ -168,6 +168,7 @@ impl<'a> Cursor<'a> {
             '%' => BinOp(Mod),
 
             ';' => SemiColon,
+            ':' => Colon,
             ',' => Comma,
             '(' => LeftParen,
             ')' => RightParen,

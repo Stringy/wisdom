@@ -112,6 +112,22 @@ impl TokenStream {
     }
 
     ///
+    /// Helper method for expecting a specific identifier. Checks that the next
+    /// token is an identifier and that it matches the given string value.
+    ///
+    pub fn expect_ident(&self, ident: &str) -> Option<Token> {
+        if let Some(tok) = self.expect(TokenKind::Identifier) {
+            if tok.literal.as_str() == ident {
+                Some(tok)
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    }
+
+    ///
     /// If the next non-whitespace `Token` matches the provided `TokenKind`, return it,
     /// otherwise returns `None`
     ///
