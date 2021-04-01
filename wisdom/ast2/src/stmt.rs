@@ -1,15 +1,19 @@
 use common::Span;
-use crate::{Expr, Function};
+use crate::{Expr, Function, Ident, NodeId};
 
 pub struct Stmt {
     pub span: Span,
     pub kind: StmtKind,
 }
 
+pub struct Decl {
+    pub span: Span,
+    pub ident: Ident,
+    pub expr: Expr,
+}
+
 pub enum StmtKind {
-    // a = <expr>
-    Decl(),
-    Expr(Box<Expr>),
-    Fn(Box<Function>),
+    Expr(Expr),
+    Fn(Function),
 }
 
