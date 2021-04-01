@@ -28,6 +28,7 @@ pub enum BinOp {
 impl BinOp {
     pub fn precendence(self) -> usize {
         match self {
+            BinOp::Eq => 1,
             BinOp::Add | BinOp::Sub => 3,
             BinOp::Mul | BinOp::Div => 4,
             BinOp::Lt | BinOp::LtEq |
@@ -38,7 +39,6 @@ impl BinOp {
             BinOp::BinOr => 13,
             BinOp::And => 14,
             BinOp::Or => 15,
-            BinOp::Eq => 16
         }
     }
 }

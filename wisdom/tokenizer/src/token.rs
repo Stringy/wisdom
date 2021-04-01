@@ -88,7 +88,7 @@ impl TokenKind {
             Add | Sub | Mul | Div |
             Lt | LtEq |
             Gt | GtEq |
-            AndAnd | OrOr | EqEq | NotEq |
+            AndAnd | OrOr | EqEq | NotEq | Eq |
             BinOp(..) => {
                 true
             }

@@ -2,7 +2,7 @@ fn foo() {
     print("Hello, world");
 }
 
-fn bar(a, b) {
+fn bar(a: int, b: int) {
     print(a + b);
     print(a + b);
 }

@@ -5,6 +5,7 @@ use crate::error::ParserError;
 use crate::error::ErrorKind::ExpectedIdent;
 use tokenizer::TokenKind::Identifier;
 
+#[derive(Clone, Debug)]
 pub struct Function {
     pub ident: Ident,
     pub args: Vec<ArgSpec>,
@@ -13,13 +14,14 @@ pub struct Function {
     pub position: Position,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ArgSpec {
     pub name: Ident,
     pub typ: Option<Typ>,
     pub position: Position,
 }
 
+#[derive(Clone, Debug)]
 pub struct Block {
     pub stmts: Vec<Stmt>,
     pub position: Position,

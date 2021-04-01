@@ -1,5 +1,5 @@
 use common::{Span, Position};
-use crate::{Ident, Block, NodeId, BinOp};
+use crate::{Ident, Block, NodeId, BinOp, Value};
 use tokenizer::{FromTokens, TokenStream, Token};
 use crate::error::ParserError;
 
@@ -8,12 +8,16 @@ use crate::ext::VecDequePopTwo;
 
 use tokenizer::TokenKind::*;
 use crate::error::ErrorKind::UnmatchedExpr;
+use std::fmt::{Debug, Formatter};
+use std::fmt;
 
+#[derive(Debug, Clone)]
 pub struct Expr {
     pub kind: ExprKind,
     pub position: Position,
 }
 
+#[derive(Clone)]
 pub enum ExprKind {
     /// a = 10
     /// expr lhs to allow for future additions such as arrays
@@ -32,10 +36,21 @@ pub enum ExprKind {
     /// foo(a, b)
     Call(Box<Expr>, Vec<Box<Expr>>),
     /// A literal `1`, `"two"` etc
-    /// Token is the literal token
-    Literal(Token),
+    Literal(Value),
     /// A named identifier (variable)
     Ident(Ident),
+}
+
+impl Debug for ExprKind {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            ExprKind::Assign(_, _) => write!(f, "ExprKind::Assign"),
+            ExprKind::BinOp(_, _, _) => write!(f, "ExprKind::BinOp"),
+            ExprKind::Call(_, _) => write!(f, "ExprKind::Call"),
+            ExprKind::Literal(_) => write!(f, "ExprKind::Literal"),
+            ExprKind::Ident(_) => write!(f, "ExprKind::Ident"),
+        }
+    }
 }
 
 macro_rules! expect_or_error {
@@ -68,7 +83,7 @@ impl Expr {
                     expect_or_error!(tokens, RightParen)?;
                 }
                 Literal { .. } => {
-                    operands.push_back(Expr::new(ExprKind::Literal(tok.clone()), tok.position.clone()))
+                    operands.push_back(Expr::new(ExprKind::Literal(Value::from_tokens(tokens)?), tok.position.clone()))
                 }
                 Identifier => {
                     operands.push_back(

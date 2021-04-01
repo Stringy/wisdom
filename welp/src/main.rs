@@ -7,7 +7,7 @@ use clap::{Arg, App};
 use std::io::{Write, BufReader};
 
 use wisdom::interpreter::{Interpreter, SlowInterpreter};
-use wisdom::ast::value::Value;
+use wisdom::ast2::Value;
 use wisdom::interpreter::error::{Error};
 use std::io::{self, BufRead};
 use std::fs::File;

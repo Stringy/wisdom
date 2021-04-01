@@ -4,11 +4,13 @@ use tokenizer::{FromTokens, TokenStream};
 use crate::error::ParserError;
 use crate::error::ErrorKind::UnexpectedEOL;
 
+#[derive(Debug, Clone)]
 pub struct Stmt {
     pub position: Position,
     pub kind: StmtKind,
 }
 
+#[derive(Debug, Clone)]
 pub enum StmtKind {
     Expr(Expr),
     Fn(Function),
@@ -29,6 +31,9 @@ impl FromTokens for Stmt {
                 }
                 _ => StmtKind::Expr(Expr::from_tokens(tokens)?),
             };
+            tokens.expect(SemiColon).ok_or(
+                ParserError::new(SemiColon, tokens.position())
+            );
             Ok(Stmt {
                 position: tok.position.clone(),
                 kind: stmt_kind,

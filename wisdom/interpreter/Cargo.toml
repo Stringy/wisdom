@@ -8,5 +8,6 @@ edition = "2018"
 
 [dependencies]
 ast = { path = "../ast" }
+ast2 = { path = "../ast2" }
 tokenizer = { path = "../tokenizer" }
 common = { path = "../common" }

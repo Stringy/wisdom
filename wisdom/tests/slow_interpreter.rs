@@ -1,4 +1,4 @@
-use wisdom::ast::value::Value;
+use wisdom::ast2::Value;
 use wisdom::interpreter::*;
 use interpreter::error::Error;
 use wisdom::interpreter::error::ErrorKind::UndefinedVar;

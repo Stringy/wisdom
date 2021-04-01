@@ -1,4 +1,4 @@
-use ast::value::Value;
+use ast2::Value;
 use crate::error::Error;
 use crate::error::ErrorKind::InvalidType;
 
