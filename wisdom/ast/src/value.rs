@@ -9,6 +9,7 @@ use crate::error::ParserError;
 use crate::error::ErrorKind::{InvalidLit, UnexpectedEOL};
 use crate::func::Function;
 
+// TODO: need to rethink the value thing. Not sure it should live here (interpreter maybe?)
 #[derive(Clone, Debug)]
 pub enum Value {
     Int(i64),

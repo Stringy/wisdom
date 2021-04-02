@@ -71,6 +71,9 @@ impl Expr {
         }
     }
 
+    ///
+    /// Recursively parses an expression from the token stream.
+    ///
     fn parse_expr(tokens: &TokenStream) -> Result<Self, ParserError> {
         let mut operators: VecDeque<BinOp> = VecDeque::new();
         let mut operands: VecDeque<Expr> = VecDeque::new();
@@ -85,6 +88,7 @@ impl Expr {
                     expect_or_error!(tokens, RightParen)?;
                 }
                 Literal { .. } => {
+                    // TODO: perhaps a literal should just contain the string repr (and move Value somewhere else)
                     operands.push_back(Expr::new(ExprKind::Literal(Value::from_tokens(tokens)?), tok.position.clone()))
                 }
                 Identifier => {
@@ -142,6 +146,10 @@ impl Expr {
         Ok(operands.pop_back().ok_or(ParserError::new(UnmatchedExpr, tokens.position()))?)
     }
 
+    ///
+    /// Parses an identifier from the `TokenStream`. `ident` is expected to be the Identifier
+    /// token, and may refer to a variable name, or function call.
+    ///
     fn parse_ident(ident: &Token, tokens: &TokenStream) -> Result<Self, ParserError> {
         // consume the ident
         tokens.consume();

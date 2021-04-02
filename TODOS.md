@@ -1,18 +1,20 @@
-# TODOs (15)
+# TODOs (17)
  * [welp/src/main.rs](welp/src/main.rs) (1)
    * `// TODO: support reading from file`
  * [wisdom/ast/src/error.rs](wisdom/ast/src/error.rs) (1)
    * `// TODO: make ExpectedTokens description not a debug thing`
- * [wisdom/ast/src/expr.rs](wisdom/ast/src/expr.rs) (4)
+ * [wisdom/ast/src/expr.rs](wisdom/ast/src/expr.rs) (5)
    * `// TODO: AssignOp(Expr, Expr),`
    * `// TODO: If(Expr, Block, Option<Expr>),`
    * `// TODO: more error construction helpers would be very useful`
+   * `// TODO: perhaps a literal should just contain the string repr (and move Value somewhere else)`
    * `// TODO: definitely need a better way of constructing these`
  * [wisdom/ast/src/func.rs](wisdom/ast/src/func.rs) (1)
    * `// TODO: add return types`
  * [wisdom/ast/src/stmt.rs](wisdom/ast/src/stmt.rs) (1)
    * `// TODO: look into semi-colon processing - when do we need them?`
- * [wisdom/ast/src/value.rs](wisdom/ast/src/value.rs) (1)
+ * [wisdom/ast/src/value.rs](wisdom/ast/src/value.rs) (2)
+   * `// TODO: need to rethink the value thing. Not sure it should live here (interpreter maybe?)`
    * `// TODO: add some tests for all operations`
  * [wisdom/interpreter/src/error.rs](wisdom/interpreter/src/error.rs) (1)
    * `// TODO: update to use an actual position`

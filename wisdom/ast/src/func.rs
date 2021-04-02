@@ -33,6 +33,7 @@ impl FromTokens for Function {
     fn from_tokens(tokens: &TokenStream) -> Result<Self, Self::Error> {
         use tokenizer::TokenKind::*;
         let mut args: Vec<ArgSpec> = Vec::new();
+        // fn_tok is used purely for its position in the source. it's used for the overall function location
         let fn_tok = tokens.expect_ident("fn").ok_or(ParserError::new(ExpectedIdent("fn"), tokens.position()))?;
         let name = tokens.expect(Identifier).ok_or(ParserError::new(Identifier, tokens.position()))?;
         tokens.expect(LeftParen).ok_or(ParserError::new(RightParen, tokens.position()))?;
