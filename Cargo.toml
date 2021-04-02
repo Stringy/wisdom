@@ -5,6 +5,5 @@ members = [
     "wisdom/ast",
     "wisdom/tokenizer",
     "wisdom/interpreter",
-    "wisdom/parser",
     "wisdom/ast"
 ]
