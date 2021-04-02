@@ -24,7 +24,7 @@ pub enum ExprKind {
     /// i.e. foo[1] = 10;
     Assign(Box<Expr>, Box<Expr>),
     /// a += 10
-    // AssignOp(Expr, Expr),
+    // TODO: AssignOp(Expr, Expr),
     /// a + 5
     BinOp(Box<Expr>, BinOp, Box<Expr>),
     /// `for <expr> { <block> }`
@@ -32,7 +32,7 @@ pub enum ExprKind {
     /// `while <expr> { <block> }`
     While(Box<Expr>, Block),
     /// `if <expr> { <block> } else { <block> }
-    // If(Expr, Block, Option<Expr>),
+    // TODO: If(Expr, Block, Option<Expr>),
     /// foo(a, b)
     Call(Box<Expr>, Vec<Box<Expr>>),
     /// A literal `1`, `"two"` etc
@@ -54,6 +54,7 @@ impl Debug for ExprKind {
     }
 }
 
+// TODO: more error construction helpers would be very useful
 macro_rules! expect_or_error {
     ($tokens:ident, $token:ident) => {
         $tokens.expect($token).ok_or(
