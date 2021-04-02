@@ -11,13 +11,15 @@ use crate::error::ErrorKind::UnmatchedExpr;
 use crate::error::ParserError;
 use crate::ext::VecDequePopTwo;
 
-#[derive(Debug, Clone)]
+use serde::{Serialize, Deserialize};
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Expr {
     pub kind: ExprKind,
     pub position: Position,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum ExprKind {
     /// a = 10
     /// expr lhs to allow for future additions such as arrays

@@ -1,0 +1,65 @@
+[
+  {
+    "position": {
+      "line": 1,
+      "column": 1
+    },
+    "kind": {
+      "Expr": {
+        "kind": {
+          "BinOp": [
+            {
+              "kind": {
+                "Literal": {
+                  "Int": 1
+                }
+              },
+              "position": {
+                "line": 1,
+                "column": 1
+              }
+            },
+            "Add",
+            {
+              "kind": {
+                "BinOp": [
+                  {
+                    "kind": {
+                      "Literal": {
+                        "Int": 2
+                      }
+                    },
+                    "position": {
+                      "line": 1,
+                      "column": 4
+                    }
+                  },
+                  "Mul",
+                  {
+                    "kind": {
+                      "Literal": {
+                        "Int": 5
+                      }
+                    },
+                    "position": {
+                      "line": 1,
+                      "column": 8
+                    }
+                  }
+                ]
+              },
+              "position": {
+                "line": 1,
+                "column": 4
+              }
+            }
+          ]
+        },
+        "position": {
+          "line": 1,
+          "column": 1
+        }
+      }
+    }
+  }
+]

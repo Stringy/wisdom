@@ -6,7 +6,10 @@ use tokenizer::{FromTokens, TokenStream};
 use crate::error::ErrorKind::ExpectedOperator;
 use crate::error::ParserError;
 
+use serde::{Serialize, Deserialize};
+
 #[derive(Debug, PartialOrd, PartialEq, Copy, Clone)]
+#[derive(Serialize, Deserialize)]
 pub enum BinOp {
     Add,
     Sub,

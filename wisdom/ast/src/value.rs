@@ -9,8 +9,11 @@ use crate::error::ParserError;
 use crate::error::ErrorKind::{InvalidLit, UnexpectedEOL};
 use crate::func::Function;
 
+use serde::{Serialize, Deserialize};
+
 // TODO: need to rethink the value thing. Not sure it should live here (interpreter maybe?)
 #[derive(Clone, Debug)]
+#[derive(Serialize, Deserialize)]
 pub enum Value {
     Int(i64),
     Float(f64),

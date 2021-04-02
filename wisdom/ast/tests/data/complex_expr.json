@@ -1,0 +1,177 @@
+[
+  {
+    "position": {
+      "line": 1,
+      "column": 1
+    },
+    "kind": {
+      "Expr": {
+        "kind": {
+          "BinOp": [
+            {
+              "kind": {
+                "BinOp": [
+                  {
+                    "kind": {
+                      "Ident": {
+                        "position": {
+                          "line": 1,
+                          "column": 1
+                        },
+                        "name": "a"
+                      }
+                    },
+                    "position": {
+                      "line": 1,
+                      "column": 1
+                    }
+                  },
+                  "Add",
+                  {
+                    "kind": {
+                      "BinOp": [
+                        {
+                          "kind": {
+                            "Call": [
+                              {
+                                "kind": {
+                                  "Ident": {
+                                    "position": {
+                                      "line": 1,
+                                      "column": 6
+                                    },
+                                    "name": "foo"
+                                  }
+                                },
+                                "position": {
+                                  "line": 1,
+                                  "column": 6
+                                }
+                              },
+                              [
+                                {
+                                  "kind": {
+                                    "BinOp": [
+                                      {
+                                        "kind": {
+                                          "BinOp": [
+                                            {
+                                              "kind": {
+                                                "Literal": {
+                                                  "Int": 1
+                                                }
+                                              },
+                                              "position": {
+                                                "line": 1,
+                                                "column": 10
+                                              }
+                                            },
+                                            "Add",
+                                            {
+                                              "kind": {
+                                                "Literal": {
+                                                  "Int": 256
+                                                }
+                                              },
+                                              "position": {
+                                                "line": 1,
+                                                "column": 13
+                                              }
+                                            }
+                                          ]
+                                        },
+                                        "position": {
+                                          "line": 1,
+                                          "column": 10
+                                        }
+                                      },
+                                      "Mul",
+                                      {
+                                        "kind": {
+                                          "Literal": {
+                                            "Int": 6
+                                          }
+                                        },
+                                        "position": {
+                                          "line": 1,
+                                          "column": 19
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  "position": {
+                                    "line": 1,
+                                    "column": 10
+                                  }
+                                },
+                                {
+                                  "kind": {
+                                    "Ident": {
+                                      "position": {
+                                        "line": 1,
+                                        "column": 22
+                                      },
+                                      "name": "bar"
+                                    }
+                                  },
+                                  "position": {
+                                    "line": 1,
+                                    "column": 22
+                                  }
+                                }
+                              ]
+                            ]
+                          },
+                          "position": {
+                            "line": 1,
+                            "column": 6
+                          }
+                        },
+                        "Mul",
+                        {
+                          "kind": {
+                            "Literal": {
+                              "Int": 8
+                            }
+                          },
+                          "position": {
+                            "line": 1,
+                            "column": 29
+                          }
+                        }
+                      ]
+                    },
+                    "position": {
+                      "line": 1,
+                      "column": 6
+                    }
+                  }
+                ]
+              },
+              "position": {
+                "line": 1,
+                "column": 1
+              }
+            },
+            "Mul",
+            {
+              "kind": {
+                "Literal": {
+                  "Int": 12
+                }
+              },
+              "position": {
+                "line": 1,
+                "column": 34
+              }
+            }
+          ]
+        },
+        "position": {
+          "line": 1,
+          "column": 1
+        }
+      }
+    }
+  }
+]

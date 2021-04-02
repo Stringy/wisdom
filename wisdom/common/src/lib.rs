@@ -1,6 +1,9 @@
-pub use position::*;
+extern crate serde;
+
 
 mod position;
+
+pub use position::*;
 
 pub trait Describable {
     fn description(&self) -> String;
