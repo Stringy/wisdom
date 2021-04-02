@@ -32,7 +32,9 @@ pub enum ExprKind {
     /// `while <expr> { <block> }`
     While(Box<Expr>, Block),
     /// `if <expr> { <block> } else { <block> }
-    // TODO: If(Expr, Block, Option<Expr>),
+    If(Box<Expr>, Block, Option<Box<Expr>>),
+    /// { <expr> }
+    Block(Block),
     /// foo(a, b)
     Call(Box<Expr>, Vec<Box<Expr>>),
     /// A literal `1`, `"two"` etc
@@ -49,7 +51,9 @@ impl Debug for ExprKind {
             ExprKind::Call(_, _) => write!(f, "ExprKind::Call"),
             ExprKind::Literal(_) => write!(f, "ExprKind::Literal"),
             ExprKind::Ident(_) => write!(f, "ExprKind::Ident"),
-            ExprKind::While(_, _) => write!(f, "ExprKind::While")
+            ExprKind::While(_, _) => write!(f, "ExprKind::While"),
+            ExprKind::If(_, _, _) => write!(f, "ExprKind::If"),
+            ExprKind::Block(_) => write!(f, "ExprKind::Block"),
         }
     }
 }
@@ -98,6 +102,23 @@ impl Expr {
                             let condition = Expr::parse_expr(tokens)?;
                             let block = Block::from_tokens(tokens)?;
                             return Ok(Expr::new(ExprKind::While(condition.into(), block), tok.position.clone()));
+                        }
+                        "if" => {
+                            tokens.consume();
+                            let condition = Expr::parse_expr(tokens)?;
+                            let block = Block::from_tokens(tokens)?;
+                            let else_expr = if let Some(tok) = tokens.peek_ident("else") {
+                                tokens.consume();
+                                if let Some(_) = tokens.peek_ident("if") {
+                                    Some(Box::new(Expr::parse_expr(tokens)?))
+                                } else {
+                                    Some(Box::new(Expr::new(ExprKind::Block(Block::from_tokens(tokens)?), tok.position.clone())))
+                                }
+                            } else {
+                                None
+                            };
+
+                            return Ok(Expr::new(ExprKind::If(condition.into(), block, else_expr), tok.position.clone()));
                         }
                         _ => {
                             operands.push_back(

@@ -145,7 +145,7 @@ impl<'a> Cursor<'a> {
             }
 
             ch if self.is_ident_start(ch) => {
-                self.consume_until(|c| !c.is_alphanumeric());
+                self.consume_until(|c| !(c.is_alphanumeric() || c == '_'));
                 Identifier
             }
 

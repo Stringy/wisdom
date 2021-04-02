@@ -69,7 +69,23 @@ impl SlowInterpreter {
             While(cond, block) => {
                 self.visit_while(cond, block)
             }
+            If(cond, block, maybe_else) => {
+                self.visit_if(cond, block, maybe_else)
+            }
+            Block(block) => self.visit_block(block)
         }
+    }
+
+    fn visit_if(&self, cond: &Expr, block: &Block, maybe_else: &Option<Box<Expr>>) -> Result<Value, Error> {
+        let mut result = Value::None;
+        if self.visit_expr(cond)?.into_bool() {
+            result = self.visit_block(block)?;
+        } else {
+            if let Some(expr) = maybe_else {
+                result = self.visit_expr(&*expr)?;
+            }
+        }
+        Ok(result)
     }
 
     fn visit_while(&self, cond: &Expr, block: &Block) -> Result<Value, Error> {
