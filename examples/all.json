@@ -1,0 +1,616 @@
+[
+  {
+    "position": {
+      "line": 1,
+      "column": 1
+    },
+    "kind": {
+      "Fn": {
+        "ident": {
+          "position": {
+            "line": 2,
+            "column": 3
+          },
+          "name": "is_valid"
+        },
+        "args": [
+          {
+            "name": {
+              "position": {
+                "line": 2,
+                "column": 13
+              },
+              "name": "a"
+            },
+            "typ": {
+              "ident": {
+                "position": {
+                  "line": 2,
+                  "column": 15
+                },
+                "name": "int"
+              }
+            },
+            "position": {
+              "line": 2,
+              "column": 13
+            }
+          }
+        ],
+        "ret_typ": null,
+        "block": {
+          "stmts": [
+            {
+              "position": {
+                "line": 2,
+                "column": 22
+              },
+              "kind": {
+                "Expr": {
+                  "kind": {
+                    "Call": [
+                      {
+                        "kind": {
+                          "Ident": {
+                            "position": {
+                              "line": 2,
+                              "column": 22
+                            },
+                            "name": "print"
+                          }
+                        },
+                        "position": {
+                          "line": 2,
+                          "column": 22
+                        }
+                      },
+                      [
+                        {
+                          "kind": {
+                            "Literal": {
+                              "String": "validating: "
+                            }
+                          },
+                          "position": {
+                            "line": 3,
+                            "column": 11
+                          }
+                        },
+                        {
+                          "kind": {
+                            "Ident": {
+                              "position": {
+                                "line": 3,
+                                "column": 26
+                              },
+                              "name": "a"
+                            }
+                          },
+                          "position": {
+                            "line": 3,
+                            "column": 26
+                          }
+                        }
+                      ]
+                    ]
+                  },
+                  "position": {
+                    "line": 2,
+                    "column": 22
+                  }
+                }
+              }
+            },
+            {
+              "position": {
+                "line": 3,
+                "column": 30
+              },
+              "kind": {
+                "Expr": {
+                  "kind": {
+                    "If": [
+                      {
+                        "kind": {
+                          "BinOp": [
+                            {
+                              "kind": {
+                                "Ident": {
+                                  "position": {
+                                    "line": 4,
+                                    "column": 7
+                                  },
+                                  "name": "a"
+                                }
+                              },
+                              "position": {
+                                "line": 4,
+                                "column": 7
+                              }
+                            },
+                            "Lt",
+                            {
+                              "kind": {
+                                "Literal": {
+                                  "Int": 10
+                                }
+                              },
+                              "position": {
+                                "line": 4,
+                                "column": 11
+                              }
+                            }
+                          ]
+                        },
+                        "position": {
+                          "line": 4,
+                          "column": 7
+                        }
+                      },
+                      {
+                        "stmts": [
+                          {
+                            "position": {
+                              "line": 4,
+                              "column": 16
+                            },
+                            "kind": {
+                              "Expr": {
+                                "kind": {
+                                  "Call": [
+                                    {
+                                      "kind": {
+                                        "Ident": {
+                                          "position": {
+                                            "line": 4,
+                                            "column": 16
+                                          },
+                                          "name": "print"
+                                        }
+                                      },
+                                      "position": {
+                                        "line": 4,
+                                        "column": 16
+                                      }
+                                    },
+                                    [
+                                      {
+                                        "kind": {
+                                          "Literal": {
+                                            "String": "    you dun goofed"
+                                          }
+                                        },
+                                        "position": {
+                                          "line": 5,
+                                          "column": 15
+                                        }
+                                      }
+                                    ]
+                                  ]
+                                },
+                                "position": {
+                                  "line": 4,
+                                  "column": 16
+                                }
+                              }
+                            }
+                          }
+                        ],
+                        "position": {
+                          "line": 4,
+                          "column": 14
+                        }
+                      },
+                      {
+                        "kind": {
+                          "If": [
+                            {
+                              "kind": {
+                                "BinOp": [
+                                  {
+                                    "kind": {
+                                      "Ident": {
+                                        "position": {
+                                          "line": 6,
+                                          "column": 14
+                                        },
+                                        "name": "a"
+                                      }
+                                    },
+                                    "position": {
+                                      "line": 6,
+                                      "column": 14
+                                    }
+                                  },
+                                  "Lt",
+                                  {
+                                    "kind": {
+                                      "Literal": {
+                                        "Int": 20
+                                      }
+                                    },
+                                    "position": {
+                                      "line": 6,
+                                      "column": 18
+                                    }
+                                  }
+                                ]
+                              },
+                              "position": {
+                                "line": 6,
+                                "column": 14
+                              }
+                            },
+                            {
+                              "stmts": [
+                                {
+                                  "position": {
+                                    "line": 6,
+                                    "column": 23
+                                  },
+                                  "kind": {
+                                    "Expr": {
+                                      "kind": {
+                                        "Call": [
+                                          {
+                                            "kind": {
+                                              "Ident": {
+                                                "position": {
+                                                  "line": 6,
+                                                  "column": 23
+                                                },
+                                                "name": "print"
+                                              }
+                                            },
+                                            "position": {
+                                              "line": 6,
+                                              "column": 23
+                                            }
+                                          },
+                                          [
+                                            {
+                                              "kind": {
+                                                "Literal": {
+                                                  "String": "    a is getting closer"
+                                                }
+                                              },
+                                              "position": {
+                                                "line": 7,
+                                                "column": 15
+                                              }
+                                            }
+                                          ]
+                                        ]
+                                      },
+                                      "position": {
+                                        "line": 6,
+                                        "column": 23
+                                      }
+                                    }
+                                  }
+                                }
+                              ],
+                              "position": {
+                                "line": 6,
+                                "column": 21
+                              }
+                            },
+                            {
+                              "kind": {
+                                "Block": {
+                                  "stmts": [
+                                    {
+                                      "position": {
+                                        "line": 8,
+                                        "column": 13
+                                      },
+                                      "kind": {
+                                        "Expr": {
+                                          "kind": {
+                                            "Call": [
+                                              {
+                                                "kind": {
+                                                  "Ident": {
+                                                    "position": {
+                                                      "line": 8,
+                                                      "column": 13
+                                                    },
+                                                    "name": "print"
+                                                  }
+                                                },
+                                                "position": {
+                                                  "line": 8,
+                                                  "column": 13
+                                                }
+                                              },
+                                              [
+                                                {
+                                                  "kind": {
+                                                    "Literal": {
+                                                      "String": "    valid"
+                                                    }
+                                                  },
+                                                  "position": {
+                                                    "line": 9,
+                                                    "column": 15
+                                                  }
+                                                }
+                                              ]
+                                            ]
+                                          },
+                                          "position": {
+                                            "line": 8,
+                                            "column": 13
+                                          }
+                                        }
+                                      }
+                                    }
+                                  ],
+                                  "position": {
+                                    "line": 8,
+                                    "column": 11
+                                  }
+                                }
+                              },
+                              "position": {
+                                "line": 8,
+                                "column": 6
+                              }
+                            }
+                          ]
+                        },
+                        "position": {
+                          "line": 6,
+                          "column": 11
+                        }
+                      }
+                    ]
+                  },
+                  "position": {
+                    "line": 3,
+                    "column": 30
+                  }
+                }
+              }
+            }
+          ],
+          "position": {
+            "line": 2,
+            "column": 20
+          }
+        },
+        "position": {
+          "line": 1,
+          "column": 1
+        }
+      }
+    }
+  },
+  {
+    "position": {
+      "line": 11,
+      "column": 2
+    },
+    "kind": {
+      "Expr": {
+        "kind": {
+          "Assign": [
+            {
+              "kind": {
+                "Ident": {
+                  "position": {
+                    "line": 11,
+                    "column": 2
+                  },
+                  "name": "a"
+                }
+              },
+              "position": {
+                "line": 11,
+                "column": 2
+              }
+            },
+            {
+              "kind": {
+                "Literal": {
+                  "Int": 0
+                }
+              },
+              "position": {
+                "line": 13,
+                "column": 4
+              }
+            }
+          ]
+        },
+        "position": {
+          "line": 11,
+          "column": 2
+        }
+      }
+    }
+  },
+  {
+    "position": {
+      "line": 13,
+      "column": 7
+    },
+    "kind": {
+      "Expr": {
+        "kind": {
+          "While": [
+            {
+              "kind": {
+                "BinOp": [
+                  {
+                    "kind": {
+                      "Ident": {
+                        "position": {
+                          "line": 14,
+                          "column": 6
+                        },
+                        "name": "a"
+                      }
+                    },
+                    "position": {
+                      "line": 14,
+                      "column": 6
+                    }
+                  },
+                  "Lt",
+                  {
+                    "kind": {
+                      "Literal": {
+                        "Int": 25
+                      }
+                    },
+                    "position": {
+                      "line": 14,
+                      "column": 10
+                    }
+                  }
+                ]
+              },
+              "position": {
+                "line": 14,
+                "column": 6
+              }
+            },
+            {
+              "stmts": [
+                {
+                  "position": {
+                    "line": 14,
+                    "column": 15
+                  },
+                  "kind": {
+                    "Expr": {
+                      "kind": {
+                        "Call": [
+                          {
+                            "kind": {
+                              "Ident": {
+                                "position": {
+                                  "line": 14,
+                                  "column": 15
+                                },
+                                "name": "is_valid"
+                              }
+                            },
+                            "position": {
+                              "line": 14,
+                              "column": 15
+                            }
+                          },
+                          [
+                            {
+                              "kind": {
+                                "Ident": {
+                                  "position": {
+                                    "line": 15,
+                                    "column": 14
+                                  },
+                                  "name": "a"
+                                }
+                              },
+                              "position": {
+                                "line": 15,
+                                "column": 14
+                              }
+                            }
+                          ]
+                        ]
+                      },
+                      "position": {
+                        "line": 14,
+                        "column": 15
+                      }
+                    }
+                  }
+                },
+                {
+                  "position": {
+                    "line": 15,
+                    "column": 17
+                  },
+                  "kind": {
+                    "Expr": {
+                      "kind": {
+                        "Assign": [
+                          {
+                            "kind": {
+                              "Ident": {
+                                "position": {
+                                  "line": 15,
+                                  "column": 17
+                                },
+                                "name": "a"
+                              }
+                            },
+                            "position": {
+                              "line": 15,
+                              "column": 17
+                            }
+                          },
+                          {
+                            "kind": {
+                              "BinOp": [
+                                {
+                                  "kind": {
+                                    "Ident": {
+                                      "position": {
+                                        "line": 16,
+                                        "column": 8
+                                      },
+                                      "name": "a"
+                                    }
+                                  },
+                                  "position": {
+                                    "line": 16,
+                                    "column": 8
+                                  }
+                                },
+                                "Add",
+                                {
+                                  "kind": {
+                                    "Literal": {
+                                      "Int": 5
+                                    }
+                                  },
+                                  "position": {
+                                    "line": 16,
+                                    "column": 12
+                                  }
+                                }
+                              ]
+                            },
+                            "position": {
+                              "line": 16,
+                              "column": 8
+                            }
+                          }
+                        ]
+                      },
+                      "position": {
+                        "line": 15,
+                        "column": 17
+                      }
+                    }
+                  }
+                }
+              ],
+              "position": {
+                "line": 14,
+                "column": 13
+              }
+            }
+          ]
+        },
+        "position": {
+          "line": 13,
+          "column": 7
+        }
+      }
+    }
+  }
+]

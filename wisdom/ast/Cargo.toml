@@ -15,7 +15,6 @@ serde = { version = "1.0.125", features = ["derive"] }
 [[bin]]
 name = "ast2json"
 path = "bin/ast2json.rs"
-required-features = ["test"]
 
 [dev-dependencies]
 paste = "1.0.5"

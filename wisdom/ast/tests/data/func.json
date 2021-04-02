@@ -1,0 +1,211 @@
+[
+  {
+    "position": {
+      "line": 1,
+      "column": 1
+    },
+    "kind": {
+      "Fn": {
+        "ident": {
+          "position": {
+            "line": 1,
+            "column": 3
+          },
+          "name": "foo"
+        },
+        "args": [
+          {
+            "name": {
+              "position": {
+                "line": 1,
+                "column": 8
+              },
+              "name": "a"
+            },
+            "typ": {
+              "ident": {
+                "position": {
+                  "line": 1,
+                  "column": 10
+                },
+                "name": "int"
+              }
+            },
+            "position": {
+              "line": 1,
+              "column": 8
+            }
+          },
+          {
+            "name": {
+              "position": {
+                "line": 1,
+                "column": 15
+              },
+              "name": "b"
+            },
+            "typ": {
+              "ident": {
+                "position": {
+                  "line": 1,
+                  "column": 18
+                },
+                "name": "str"
+              }
+            },
+            "position": {
+              "line": 1,
+              "column": 15
+            }
+          }
+        ],
+        "ret_typ": null,
+        "block": {
+          "stmts": [
+            {
+              "position": {
+                "line": 1,
+                "column": 25
+              },
+              "kind": {
+                "Expr": {
+                  "kind": {
+                    "Call": [
+                      {
+                        "kind": {
+                          "Ident": {
+                            "position": {
+                              "line": 1,
+                              "column": 25
+                            },
+                            "name": "print"
+                          }
+                        },
+                        "position": {
+                          "line": 1,
+                          "column": 25
+                        }
+                      },
+                      [
+                        {
+                          "kind": {
+                            "Ident": {
+                              "position": {
+                                "line": 2,
+                                "column": 11
+                              },
+                              "name": "a"
+                            }
+                          },
+                          "position": {
+                            "line": 2,
+                            "column": 11
+                          }
+                        },
+                        {
+                          "kind": {
+                            "Literal": {
+                              "String": ", "
+                            }
+                          },
+                          "position": {
+                            "line": 2,
+                            "column": 13
+                          }
+                        },
+                        {
+                          "kind": {
+                            "Ident": {
+                              "position": {
+                                "line": 2,
+                                "column": 19
+                              },
+                              "name": "b"
+                            }
+                          },
+                          "position": {
+                            "line": 2,
+                            "column": 19
+                          }
+                        }
+                      ]
+                    ]
+                  },
+                  "position": {
+                    "line": 1,
+                    "column": 25
+                  }
+                }
+              }
+            }
+          ],
+          "position": {
+            "line": 1,
+            "column": 23
+          }
+        },
+        "position": {
+          "line": 1,
+          "column": 1
+        }
+      }
+    }
+  },
+  {
+    "position": {
+      "line": 3,
+      "column": 2
+    },
+    "kind": {
+      "Expr": {
+        "kind": {
+          "Call": [
+            {
+              "kind": {
+                "Ident": {
+                  "position": {
+                    "line": 3,
+                    "column": 2
+                  },
+                  "name": "foo"
+                }
+              },
+              "position": {
+                "line": 3,
+                "column": 2
+              }
+            },
+            [
+              {
+                "kind": {
+                  "Literal": {
+                    "Int": 1
+                  }
+                },
+                "position": {
+                  "line": 5,
+                  "column": 5
+                }
+              },
+              {
+                "kind": {
+                  "Literal": {
+                    "String": "thing"
+                  }
+                },
+                "position": {
+                  "line": 5,
+                  "column": 7
+                }
+              }
+            ]
+          ]
+        },
+        "position": {
+          "line": 3,
+          "column": 2
+        }
+      }
+    }
+  }
+]

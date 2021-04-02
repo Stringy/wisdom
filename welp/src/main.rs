@@ -11,7 +11,7 @@ use wisdom::ast::Value;
 use wisdom::interpreter::error::{Error};
 use std::io::{self, BufRead};
 use std::fs::File;
-use wisdom::common::{Position, Describable, WisdomError};
+use wisdom::common::{Position, WisdomError};
 use rustyline::Editor;
 
 fn do_write(msg: &str) {
@@ -41,7 +41,7 @@ fn handle(err: Error, filename: &str) {
     let position = err.position();
     if let Ok(line) = get_line(filename, position.line - 1) {
         do_write(format!("{}:{}:{}\n", filename, position.line, position.column).as_str());
-        handle_err_with_line(err.description(), position, line);
+        handle_err_with_line(format!("{}", err), position, line);
     } else {
         panic!("Error occurred when handling an error. Damn.")
     }
@@ -88,7 +88,7 @@ fn main() {
                                 }
                             }
                             Err(e) => {
-                                do_write(format!("{}\n", e.description()).as_str())
+                                do_write(format!("{}\n", e).as_str())
                             }
                         }
                     }

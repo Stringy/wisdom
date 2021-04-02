@@ -26,3 +26,6 @@ macro_rules! test_ast_creation {
 test_ast_creation!(simple_expr, "tests/data/simple_expr");
 test_ast_creation!(complex_expr, "tests/data/complex_expr");
 test_ast_creation!(simple_multiline, "tests/data/simple_multiline");
+test_ast_creation!(while, "tests/data/while");
+test_ast_creation!(if, "tests/data/if");
+test_ast_creation!(func, "tests/data/func");

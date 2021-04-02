@@ -1,0 +1,5 @@
+fn foo(a: int, b: str) {
+    print(a, ", ", b);
+}
+
+foo(1, "thing");

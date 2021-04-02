@@ -2,7 +2,7 @@ use std::fmt::{Display, Formatter};
 use std::fmt;
 
 use ast::error::ParserError;
-use common::{Describable, Position, WisdomError};
+use common::{Position, WisdomError};
 use tokenizer::Token;
 
 #[derive(PartialEq, Debug, Clone)]
@@ -17,10 +17,10 @@ impl Display for Error {
     }
 }
 
-impl Describable for Error {
+impl Error {
     fn description(&self) -> String {
         match &self.kind {
-            ErrorKind::Parser(p) => p.description(),
+            ErrorKind::Parser(p) => format!("{}", p),
             ErrorKind::UndefinedVar(name) => format!("Undefined variable '{}'", name),
             ErrorKind::Unexpected(tok) => format!("Unexpected token '{:?}'", tok.kind),
             ErrorKind::InvalidType => format!("Invalid type in expression"),
@@ -37,6 +37,8 @@ impl WisdomError for Error {
         self.position
     }
 }
+
+impl std::error::Error for Error {}
 
 #[derive(PartialEq, Debug, Clone)]
 pub enum ErrorKind {

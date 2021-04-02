@@ -169,20 +169,18 @@ impl SlowInterpreter {
 }
 
 impl Interpreter<Value, Error> for SlowInterpreter {
-    fn eval_line(&mut self, input: &str) -> Result<Value, Error> {
-        let tokens = TokenStream::new(input);
-        let stmt = Stmt::from_tokens(&tokens)?;
-        self.visit_stmt(&stmt)
+    fn eval_file<P: Into<PathBuf>>(&mut self, path: P) -> Result<Value, Error> {
+        let script = std::fs::read_to_string(path.into())?;
+        self.eval_script(&script)
     }
 
-    fn eval_file<P: Into<PathBuf>>(&mut self, path: P) -> Result<Value, Error> {
-        use std::fs;
-        let script = fs::read_to_string(path.into())?;
-        let tokens = TokenStream::new(script.as_str());
+    fn eval_script(&mut self, script: &str) -> Result<Value, Error> {
+        let tokens = TokenStream::new(script);
+        let mut result = Value::None;
         while !tokens.is_empty() {
             let stmt = Stmt::from_tokens(&tokens)?;
-            self.visit_stmt(&stmt)?;
+            result = self.visit_stmt(&stmt)?;
         }
-        Ok(Value::None)
+        Ok(result)
     }
 }
