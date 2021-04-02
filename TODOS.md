@@ -1,11 +1,10 @@
-# TODOs (17)
+# TODOs (16)
  * [welp/src/main.rs](welp/src/main.rs) (1)
    * `// TODO: support reading from file`
  * [wisdom/ast/src/error.rs](wisdom/ast/src/error.rs) (1)
    * `// TODO: make ExpectedTokens description not a debug thing`
- * [wisdom/ast/src/expr.rs](wisdom/ast/src/expr.rs) (5)
+ * [wisdom/ast/src/expr.rs](wisdom/ast/src/expr.rs) (4)
    * `// TODO: AssignOp(Expr, Expr),`
-   * `// TODO: If(Expr, Block, Option<Expr>),`
    * `// TODO: more error construction helpers would be very useful`
    * `// TODO: perhaps a literal should just contain the string repr (and move Value somewhere else)`
    * `// TODO: definitely need a better way of constructing these`

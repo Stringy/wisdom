@@ -178,6 +178,22 @@ impl TokenStream {
     }
 
     ///
+    /// Peeks at the next token. If that token is an Identifier and matches
+    /// the given string, then the token is returned. Otherwise return None.
+    ///
+    pub fn peek_ident(&self, ident: &str) -> Option<Token> {
+        if let Some(tok) = self.peek() {
+            if tok.kind == TokenKind::Identifier && tok.literal.as_str() == ident {
+                Some(tok)
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    }
+
+    ///
     /// Returns and consumes the next `Token` in the list.
     ///
     /// ```
