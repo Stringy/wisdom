@@ -2,7 +2,7 @@ use std::fmt::{Display, Formatter};
 use std::fmt;
 
 use ast::error::ParserError;
-use common::{Describable, WisdomError, Position};
+use common::{Describable, Position, WisdomError};
 use tokenizer::Token;
 
 #[derive(PartialEq, Debug, Clone)]
@@ -26,6 +26,8 @@ impl Describable for Error {
             ErrorKind::InvalidType => format!("Invalid type in expression"),
             ErrorKind::IOError(io) => format!("IO Error: {}", io),
             ErrorKind::UnexpectedArgs(exp, act) => format!("Expected {} args, got {}", exp, act),
+            ErrorKind::InvalidAssignment => format!("Invalid assignment"),
+            ErrorKind::NotCallable => format!("not callable"),
         }
     }
 }
@@ -42,6 +44,8 @@ pub enum ErrorKind {
     UndefinedVar(String),
     Unexpected(Token),
     InvalidType,
+    InvalidAssignment,
+    NotCallable,
     IOError(String),
     UnexpectedArgs(usize, usize),
 }

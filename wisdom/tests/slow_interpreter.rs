@@ -1,6 +1,6 @@
-use wisdom::ast::value::Value;
-use wisdom::interpreter::*;
 use interpreter::error::Error;
+use wisdom::ast::Value;
+use wisdom::interpreter::*;
 use wisdom::interpreter::error::ErrorKind::UndefinedVar;
 
 fn run_lines(itp: &mut SlowInterpreter, lines: &[&str], expect: Result<Value, Error>) {

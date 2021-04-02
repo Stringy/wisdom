@@ -2,11 +2,13 @@ fn foo() {
     print("Hello, world");
 }
 
-fn bar(a, b) {
+fn bar(a: int, b: int) {
     print(a + b);
+    print(a + b * 50);
 }
 
 a = 1;
 foo();
-bar(5, 2);
+bar(a, 2);
 
+print(foo, " ", bar);

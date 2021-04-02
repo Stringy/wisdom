@@ -180,6 +180,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "parser"
+version = "0.1.0"
+dependencies = [
+ "ast",
+]
+
+[[package]]
 name = "radix_trie"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -334,5 +341,6 @@ dependencies = [
  "ast",
  "common",
  "interpreter",
+ "parser",
  "tokenizer",
 ]

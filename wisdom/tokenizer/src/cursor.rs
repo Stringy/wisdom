@@ -2,8 +2,8 @@ use std::str::Chars;
 
 use common::Position;
 
-use crate::token::{Token, TokenKind, LiteralKind};
 use crate::Base;
+use crate::token::{LiteralKind, Token, TokenKind};
 
 ///
 /// A Cursor is responsible for breaking up an input
@@ -168,6 +168,7 @@ impl<'a> Cursor<'a> {
             '%' => BinOp(Mod),
 
             ';' => SemiColon,
+            ':' => Colon,
             ',' => Comma,
             '(' => LeftParen,
             ')' => RightParen,

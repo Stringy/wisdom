@@ -1,7 +1,8 @@
-use std::collections::VecDeque;
 use std::cell::RefCell;
+use std::collections::VecDeque;
 
 use common::Position;
+
 use crate::{Token, tokenize, TokenKind};
 use crate::TokenKind::Whitespace;
 
@@ -106,6 +107,22 @@ impl TokenStream {
         let tok = self.peek()?;
         if func(tok.kind) {
             self.consume()
+        } else {
+            None
+        }
+    }
+
+    ///
+    /// Helper method for expecting a specific identifier. Checks that the next
+    /// token is an identifier and that it matches the given string value.
+    ///
+    pub fn expect_ident(&self, ident: &str) -> Option<Token> {
+        if let Some(tok) = self.expect(TokenKind::Identifier) {
+            if tok.literal.as_str() == ident {
+                Some(tok)
+            } else {
+                None
+            }
         } else {
             None
         }

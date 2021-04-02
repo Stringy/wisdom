@@ -1,4 +1,4 @@
-use std::fmt::{Debug};
+use std::fmt::Debug;
 
 use common::{Describable, Position, WisdomError};
 use tokenizer::TokenKind;

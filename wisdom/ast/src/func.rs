@@ -1,95 +1,116 @@
-use crate::stmt::Stmt;
-use tokenizer::{FromTokens, TokenStream, Token};
-use tokenizer::TokenKind::*;
+use common::Position;
+use tokenizer::{FromTokens, Token, TokenStream};
+
+use crate::{Ident, Stmt, Typ};
+use crate::error::ErrorKind::ExpectedIdent;
 use crate::error::ParserError;
-use crate::error::ErrorKind::*;
-use std::fmt::{Display, Formatter};
-use std::fmt;
 
 #[derive(Clone, Debug)]
 pub struct Function {
-    pub name: String,
+    pub ident: Ident,
     pub args: Vec<ArgSpec>,
-    pub body: Vec<Stmt>,
+    pub ret_typ: Option<Typ>,
+    pub block: Block,
+    pub position: Position,
 }
 
-impl Display for Function {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "{}({})", self.name, self.args.iter().map(|a| a.name.clone()).collect::<Vec<String>>().join(", "))
-    }
+#[derive(Clone, Debug)]
+pub struct ArgSpec {
+    pub name: Ident,
+    pub typ: Option<Typ>,
+    pub position: Position,
+}
+
+#[derive(Clone, Debug)]
+pub struct Block {
+    pub stmts: Vec<Stmt>,
+    pub position: Position,
 }
 
 impl FromTokens for Function {
     type Error = ParserError;
 
     fn from_tokens(tokens: &TokenStream) -> Result<Self, Self::Error> {
-        // consume fn
-        tokens.consume();
-
-        if let Some(Token { literal, .. }) = tokens.expect(Identifier) {
-            tokens.expect(LeftParen).ok_or(
-                ParserError::new(ExpectedTokens(&[LeftParen]), tokens.position())
-            )?;
-            let mut args = Vec::new();
-            loop {
-                if let Some(Token { kind: RightParen, .. }) = tokens.peek() {
-                    break;
-                }
-
-                args.push(ArgSpec::from_tokens(tokens)?);
-                if let Some(Token { kind: Comma, .. }) = tokens.peek() {
-                    tokens.consume();
-                    continue;
-                }
-                break;
+        use tokenizer::TokenKind::*;
+        let mut args: Vec<ArgSpec> = Vec::new();
+        // fn_tok is used purely for its position in the source. it's used for the overall function location
+        let fn_tok = tokens.expect_ident("fn").ok_or(ParserError::new(ExpectedIdent("fn"), tokens.position()))?;
+        let name = tokens.expect(Identifier).ok_or(ParserError::new(Identifier, tokens.position()))?;
+        tokens.expect(LeftParen).ok_or(ParserError::new(RightParen, tokens.position()))?;
+        while let None = tokens.expect(RightParen) {
+            args.push(ArgSpec::from_tokens(tokens)?);
+            if let Some(Token { kind: Comma, .. }) = tokens.peek() {
+                tokens.consume();
             }
-            tokens.expect(RightParen).ok_or(
-                ParserError::new(ExpectedTokens(&[RightParen]), tokens.position())
-            )?;
-            tokens.expect(LeftBrace).ok_or(
-                ParserError::new(ExpectedTokens(&[LeftBrace]), tokens.position())
-            )?;
-
-            let mut stmts = Vec::new();
-            loop {
-                let token = tokens.peek();
-                match token {
-                    Some(Token { kind: RightBrace, .. }) => {
-                        tokens.consume();
-                        break;
-                    },
-                    _ => {
-                        stmts.push(Stmt::from_tokens(tokens)?)
-                    }
-                }
-            }
-
-            Ok(Self {
-                name: literal.to_owned(),
-                args,
-                body: stmts,
-            })
-        } else {
-            Err(ParserError::new(ExpectedTokens(&[Identifier]), tokens.position()))
         }
+        // TODO: add return types
+        let block = Block::from_tokens(tokens)?;
+        Ok(Self {
+            ident: Ident {
+                name: name.literal.clone(),
+                position: name.position.clone(),
+            },
+            args: args.clone(),
+            ret_typ: None,
+            block,
+            position: fn_tok.position.clone(),
+        })
     }
-}
-
-#[derive(Debug, Clone, PartialOrd, PartialEq)]
-pub struct ArgSpec {
-    pub name: String
 }
 
 impl FromTokens for ArgSpec {
     type Error = ParserError;
 
     fn from_tokens(tokens: &TokenStream) -> Result<Self, Self::Error> {
-        let ident = tokens.expect(Identifier)
-            .ok_or(
-                ParserError::new(ExpectedTokens(&[Identifier]), tokens.position())
+        use tokenizer::TokenKind::*;
+
+        let name = tokens.expect(Identifier).ok_or(
+            ParserError::new(Identifier, tokens.position())
+        )?;
+
+        let typ = if let Some(Token { kind: Colon, .. }) = tokens.peek() {
+            tokens.consume();
+            let typ = tokens.expect(Identifier).ok_or(
+                ParserError::new(Identifier, tokens.position())
             )?;
+            Some(Typ {
+                ident: Ident {
+                    name: typ.literal.clone(),
+                    position: typ.position.clone(),
+                }
+            })
+        } else {
+            None
+        };
+
         Ok(Self {
-            name: ident.literal.to_owned()
+            name: Ident {
+                name: name.literal.clone(),
+                position: name.position.clone(),
+            },
+            typ,
+            position: name.position.clone(),
+        })
+    }
+}
+
+impl FromTokens for Block {
+    type Error = ParserError;
+
+    fn from_tokens(tokens: &TokenStream) -> Result<Self, Self::Error> {
+        use tokenizer::TokenKind::*;
+        let start = tokens.expect(LeftBrace).ok_or(
+            ParserError::new(LeftBrace, tokens.position())
+        )?;
+
+        let mut stmts = Vec::new();
+        while let None = tokens.expect(RightBrace) {
+            stmts.push(Stmt::from_tokens(tokens)?);
+        }
+
+        Ok(Self {
+            stmts,
+            position: start.position.clone(),
         })
     }
 }
