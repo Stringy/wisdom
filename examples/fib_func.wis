@@ -1,4 +1,4 @@
-fn fib(n) {
+fn fib(n: int) {
     a = 1;
     b = 1;
 

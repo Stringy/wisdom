@@ -3,7 +3,7 @@ use crate::{Interpreter, builtin};
 use crate::error::{Error, ErrorKind};
 use crate::value::Operations;
 use std::path::PathBuf;
-use ast2::{Value, BinOp};
+use ast2::{Value, BinOp, Block};
 use tokenizer::{TokenStream, FromTokens, TokenKind, LiteralKind};
 use ast2::{Stmt, StmtKind, Expr, ExprKind};
 use ast2::error::ParserError;
@@ -66,7 +66,28 @@ impl SlowInterpreter {
             Ident(ident) => {
                 self.globals.lookup(&ident.name).ok_or(Error::new(UndefinedVar(ident.name.clone())))
             }
+            While(cond, block) => {
+                self.visit_while(cond, block)
+            }
         }
+    }
+
+    fn visit_while(&self, cond: &Expr, block: &Block) -> Result<Value, Error> {
+        while self.visit_expr(cond)?.into_bool() {
+            self.visit_block(block)?;
+        }
+        Ok(Value::None)
+    }
+
+    fn visit_block(&self, block: &Block) -> Result<Value, Error> {
+        // TODO: macro this globals push/pop pattern? scope! { ... };
+        self.globals.push();
+        let mut result = Value::None;
+        for stmt in &block.stmts {
+            result = self.visit_stmt(stmt)?;
+        }
+        self.globals.pop();
+        Ok(result)
     }
 
     fn visit_call(&self, name: &String, args: &Vec<Box<Expr>>) -> Result<Value, Error> {

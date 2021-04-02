@@ -30,7 +30,7 @@ pub enum ExprKind {
     /// `for <expr> { <block> }`
     // For(Expr, Block),
     /// `while <expr> { <block> }`
-    // While(Expr, Block),
+    While(Box<Expr>, Block),
     /// `if <expr> { <block> } else { <block> }
     // If(Expr, Block, Option<Expr>),
     /// foo(a, b)
@@ -49,6 +49,7 @@ impl Debug for ExprKind {
             ExprKind::Call(_, _) => write!(f, "ExprKind::Call"),
             ExprKind::Literal(_) => write!(f, "ExprKind::Literal"),
             ExprKind::Ident(_) => write!(f, "ExprKind::Ident"),
+            ExprKind::While(_, _) => write!(f, "ExprKind::While")
         }
     }
 }
@@ -86,9 +87,19 @@ impl Expr {
                     operands.push_back(Expr::new(ExprKind::Literal(Value::from_tokens(tokens)?), tok.position.clone()))
                 }
                 Identifier => {
-                    operands.push_back(
-                        Expr::parse_ident(tok, tokens)?
-                    )
+                    match tok.literal.as_str() {
+                        "while" => {
+                            tokens.consume();
+                            let condition = Expr::parse_expr(tokens)?;
+                            let block = Block::from_tokens(tokens)?;
+                            return Ok(Expr::new(ExprKind::While(condition.into(), block), tok.position.clone()));
+                        }
+                        _ => {
+                            operands.push_back(
+                                Expr::parse_ident(tok, tokens)?
+                            )
+                        }
+                    }
                 }
                 _ if tok.kind.is_operator() => {
                     let op = BinOp::from_tokens(tokens)?;
@@ -131,37 +142,31 @@ impl Expr {
     }
 
     fn parse_ident(ident: &Token, tokens: &TokenStream) -> Result<Self, ParserError> {
-        match ident.literal.as_str() {
-            // using a match because later it'll be useful to differentiate between
-            // types of ident, which can include keywords i.e. if, while, etc
-            _ => {
-                // consume the ident
+        // consume the ident
+        tokens.consume();
+        match tokens.peek() {
+            Some(Token { kind: LeftParen, .. }) => {
+                // looks like a function call
+                // consume the Lparen
                 tokens.consume();
-                match tokens.peek() {
-                    Some(Token { kind: LeftParen, .. }) => {
-                        // looks like a function call
-                        // consume the Lparen
+                let mut args = Vec::new();
+                while let None = tokens.expect(RightParen) {
+                    args.push(Expr::parse_expr(tokens)?.into());
+                    if let Some(Token { kind: Comma, .. }) = tokens.peek() {
                         tokens.consume();
-                        let mut args = Vec::new();
-                        while let None = tokens.expect(RightParen) {
-                            args.push(Expr::parse_expr(tokens)?.into());
-                            if let Some(Token { kind: Comma, .. }) = tokens.peek() {
-                                tokens.consume();
-                            }
-                        }
-                        // TODO: definitely need a better way of constructing these
-                        return Ok(Expr::new(
-                            ExprKind::Call(
-                                Expr::new(ExprKind::Ident(ident.into()), ident.position.clone()).into(),
-                                args,
-                            ),
-                            ident.position.clone(),
-                        ));
-                    }
-                    _ => {
-                        return Ok(Expr::new(ExprKind::Ident(ident.into()), ident.position.clone()));
                     }
                 }
+                // TODO: definitely need a better way of constructing these
+                return Ok(Expr::new(
+                    ExprKind::Call(
+                        Expr::new(ExprKind::Ident(ident.into()), ident.position.clone()).into(),
+                        args,
+                    ),
+                    ident.position.clone(),
+                ));
+            }
+            _ => {
+                return Ok(Expr::new(ExprKind::Ident(ident.into()), ident.position.clone()));
             }
         }
     }
