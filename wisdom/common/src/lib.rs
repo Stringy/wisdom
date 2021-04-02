@@ -1,8 +1,6 @@
-mod position;
-mod span;
-
 pub use position::*;
-pub use span::*;
+
+mod position;
 
 pub trait Describable {
     fn description(&self) -> String;

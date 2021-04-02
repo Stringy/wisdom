@@ -1,5 +1,5 @@
-use std::fmt::Display;
 use std::fmt;
+use std::fmt::Display;
 
 ///
 /// A position describes a place in the source code.

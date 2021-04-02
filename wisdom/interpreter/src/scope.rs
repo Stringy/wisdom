@@ -1,6 +1,7 @@
-use std::collections::HashMap;
-use ast2::Value;
 use std::cell::RefCell;
+use std::collections::HashMap;
+
+use ast::Value;
 
 pub type Scope = HashMap<String, Value>;
 

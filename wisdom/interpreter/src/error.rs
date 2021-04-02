@@ -1,8 +1,8 @@
 use std::fmt::{Display, Formatter};
 use std::fmt;
 
-use ast2::error::ParserError;
-use common::{Describable, WisdomError, Position};
+use ast::error::ParserError;
+use common::{Describable, Position, WisdomError};
 use tokenizer::Token;
 
 #[derive(PartialEq, Debug, Clone)]

@@ -1,18 +1,16 @@
-mod scope;
-mod slow;
-mod builtin;
-mod value;
-pub mod error;
-
-pub use slow::*;
-
 extern crate ast;
 extern crate tokenizer;
 
 use std::path::PathBuf;
 
-use crate::error::Error;
 use common::WisdomError;
+pub use slow::*;
+
+mod scope;
+mod slow;
+mod builtin;
+mod value;
+pub mod error;
 
 pub trait Interpreter<T, W: WisdomError> {
     ///

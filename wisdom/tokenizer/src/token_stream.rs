@@ -1,7 +1,8 @@
-use std::collections::VecDeque;
 use std::cell::RefCell;
+use std::collections::VecDeque;
 
 use common::Position;
+
 use crate::{Token, tokenize, TokenKind};
 use crate::TokenKind::Whitespace;
 

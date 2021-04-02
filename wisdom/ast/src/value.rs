@@ -1,20 +1,22 @@
-use tokenizer::{FromTokens, TokenStream};
-use std::str::FromStr;
-use crate::error::{ParserError};
-use crate::error::ErrorKind::{UnexpectedEOL, InvalidLit};
+use std::cmp::Ordering;
 use std::fmt::{Display, Formatter};
 use std::fmt;
+use std::str::FromStr;
+
+use tokenizer::{FromTokens, TokenStream};
+
+use crate::error::ParserError;
+use crate::error::ErrorKind::{InvalidLit, UnexpectedEOL};
 use crate::func::Function;
-use std::cmp::Ordering;
 
 #[derive(Clone, Debug)]
 pub enum Value {
     Int(i64),
     Float(f64),
     Bool(bool),
+    Func(Function),
     String(String),
     Named(String),
-    Func(Function),
     None,
 }
 
@@ -28,7 +30,6 @@ impl PartialEq for Value {
             (Bool(n), Bool(m)) => n == m,
             (String(n), String(m)) => n == m,
             (Named(n), Named(m)) => n == m,
-            (Func(n), Func(m)) => n.name == m.name,
             _ => false
         }
     }
@@ -57,7 +58,7 @@ impl Display for Value {
             Value::Bool(n) => write!(f, "{}", n),
             Value::String(n) => write!(f, "{}", n),
             Value::Named(n) => write!(f, "{}", n),
-            Value::Func(func) => write!(f, "{}", func),
+            Value::Func(func) => write!(f, "{}", func.ident.name),
             Value::None => write!(f, "none")
         }
     }

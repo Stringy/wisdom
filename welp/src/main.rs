@@ -7,7 +7,7 @@ use clap::{Arg, App};
 use std::io::{Write, BufReader};
 
 use wisdom::interpreter::{Interpreter, SlowInterpreter};
-use wisdom::ast2::Value;
+use wisdom::ast::Value;
 use wisdom::interpreter::error::{Error};
 use std::io::{self, BufRead};
 use std::fs::File;
@@ -17,12 +17,6 @@ use rustyline::Editor;
 fn do_write(msg: &str) {
     std::io::stdout().write(msg.as_bytes()).unwrap();
     std::io::stdout().flush().unwrap();
-}
-
-fn get_input() -> String {
-    let mut line = String::new();
-    std::io::stdin().read_line(&mut line).unwrap();
-    line
 }
 
 fn get_line(filename: &str, line: usize) -> io::Result<String> {

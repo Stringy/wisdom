@@ -1,14 +1,14 @@
-use crate::scope::Context;
-use crate::{Interpreter, builtin};
-use crate::error::{Error, ErrorKind};
-use crate::value::Operations;
 use std::path::PathBuf;
-use ast2::{Value, BinOp, Block};
-use tokenizer::{TokenStream, FromTokens, TokenKind, LiteralKind};
-use ast2::{Stmt, StmtKind, Expr, ExprKind};
-use ast2::error::ParserError;
-use common::WisdomError;
-use crate::error::ErrorKind::{UndefinedVar, InvalidAssignment, UnexpectedArgs, NotCallable};
+
+use ast::{BinOp, Block, Value};
+use ast::{Expr, ExprKind, Stmt, StmtKind};
+use tokenizer::{FromTokens, TokenStream};
+
+use crate::{builtin, Interpreter};
+use crate::error::Error;
+use crate::error::ErrorKind::{InvalidAssignment, NotCallable, UndefinedVar, UnexpectedArgs};
+use crate::scope::Context;
+use crate::value::Operations;
 
 pub struct SlowInterpreter {
     globals: Context,
@@ -165,7 +165,7 @@ impl Interpreter<Value, Error> for SlowInterpreter {
         let tokens = TokenStream::new(script.as_str());
         while !tokens.is_empty() {
             let stmt = Stmt::from_tokens(&tokens)?;
-            self.visit_stmt(&stmt);
+            self.visit_stmt(&stmt)?;
         }
         Ok(Value::None)
     }
