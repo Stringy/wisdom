@@ -1,0 +1,17 @@
+
+fn is_valid(a: int) {
+    print("validating: ", a);
+    if a < 10 {
+        print("    you dun goofed");
+    } else if a < 20 {
+        print("    a is getting closer");
+    } else {
+        print("    valid");
+    }
+}
+
+a = 0;
+while a < 25 {
+    is_valid(a);
+    a = a + 5;
+}
