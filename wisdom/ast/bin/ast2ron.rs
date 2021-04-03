@@ -6,7 +6,6 @@ use std::error::Error;
 use tokenizer::{TokenStream, FromTokens};
 use ast::Stmt;
 
-use std::path::Path;
 use ron::ser::PrettyConfig;
 
 fn main() -> Result<(), Box<dyn Error>> {
