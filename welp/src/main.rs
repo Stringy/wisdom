@@ -58,6 +58,12 @@ fn main() {
             Arg::with_name("file")
                 .help("run a given wisdom file")
                 .takes_value(true)
+        )
+        .arg(
+            Arg::with_name("eval")
+                .short("e")
+                .help("run a given expression")
+                .takes_value(true)
         ).get_matches();
 
     match args.value_of("file") {
@@ -71,34 +77,46 @@ fn main() {
             }
         }
         None => {
-            use rustyline::error::ReadlineError::*;
-            do_write("Wisdom REPL (WELP) v1.0\n");
-            loop {
-                let input = rl.readline(">>> ");
-                match input {
-                    Ok(line) => {
-                        if line == "\n" || line.is_empty() {
-                            continue;
-                        }
+            match args.value_of("eval") {
+                Some(script) => {
+                    match interp.eval_script(script) {
+                        Ok(v) => do_write(format!("{}\n", v).as_str()),
+                        Err(e) => do_write(format!("{}\n", e).as_str()),
+                    }
+                }
+                None => {
+                    use rustyline::error::ReadlineError::*;
+                    do_write("Wisdom REPL (WELP) v1.0\n");
+                    loop {
+                        let input = rl.readline(">>> ");
+                        match input {
+                            Ok(line) => {
+                                if line == "\n" || line.is_empty() {
+                                    continue;
+                                }
 
-                        match interp.eval_line(line.as_str()) {
-                            Ok(v) => {
-                                if v != Value::None {
-                                    do_write(format!("{}\n", v).as_str())
+                                rl.add_history_entry(line.clone());
+
+                                match interp.eval_line(line.as_str()) {
+                                    Ok(v) => {
+                                        if v != Value::None {
+                                            do_write(format!("{}\n", v).as_str())
+                                        }
+                                    }
+                                    Err(e) => {
+                                        do_write(format!("{}\n", e).as_str())
+                                    }
                                 }
                             }
-                            Err(e) => {
-                                do_write(format!("{}\n", e).as_str())
+                            Err(Interrupted) | Err(Eof) => {
+                                do_write("Exiting.\n");
+                                break;
+                            }
+                            Err(err) => {
+                                do_write(format!("Input error: {}\n", err).as_str());
+                                break;
                             }
                         }
-                    }
-                    Err(Interrupted) | Err(Eof) => {
-                        do_write("Exiting.\n");
-                        break;
-                    }
-                    Err(err) => {
-                        do_write(format!("Input error: {}\n", err).as_str());
-                        break;
                     }
                 }
             }
