@@ -30,19 +30,23 @@ pub enum BinOp {
 }
 
 impl BinOp {
-    pub fn precendence(self) -> usize {
+    ///
+    /// Defines the operator precedence. Lower value is higher-precedence.
+    /// Lifted from C's precedence rules (for consistence with other C-style languages)
+    ///
+    pub fn precedence(self) -> usize {
+        use BinOp::*;
         match self {
-            BinOp::Eq => 1,
-            BinOp::Add | BinOp::Sub => 3,
-            BinOp::Mul | BinOp::Div => 4,
-            BinOp::Lt | BinOp::LtEq |
-            BinOp::Gt | BinOp::GtEq => 9,
-            BinOp::EqEq | BinOp::NotEq => 10,
-            BinOp::BinAnd => 11,
-            BinOp::Xor => 12,
-            BinOp::BinOr => 13,
-            BinOp::And => 14,
-            BinOp::Or => 15,
+            Mul | Div => 3,
+            Add | Sub => 4,
+            Lt | LtEq | Gt | GtEq => 6,
+            EqEq | NotEq => 7,
+            BinAnd => 8,
+            Xor => 9,
+            BinOr => 10,
+            And => 11,
+            Or => 12,
+            Eq => 14,
         }
     }
 }

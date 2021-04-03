@@ -1,0 +1,33 @@
+[
+    (
+        kind: Expr((
+            kind: BinOp((
+                kind: BinOp((
+                    kind: BinOp((
+                        kind: Ident((
+                            name: "a",
+                        )),
+                    ), Lt, (
+                        kind: Literal(Int(10)),
+                    )),
+                ), And, (
+                    kind: BinOp((
+                        kind: Ident((
+                            name: "a",
+                        )),
+                    ), And, (
+                        kind: Literal(Int(5)),
+                    )),
+                )),
+            ), And, (
+                kind: BinOp((
+                    kind: Ident((
+                        name: "a",
+                    )),
+                ), Lt, (
+                    kind: Literal(Int(9)),
+                )),
+            )),
+        )),
+    ),
+]

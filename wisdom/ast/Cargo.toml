@@ -9,12 +9,13 @@ edition = "2018"
 [dependencies]
 common = { path = "../common" }
 tokenizer = { path = "../tokenizer" }
-serde_json = "1.0.64"
+ron = "0.6.4"
 serde = { version = "1.0.125", features = ["derive"] }
 
 [[bin]]
-name = "ast2json"
-path = "bin/ast2json.rs"
+name = "ast2ron"
+path = "bin/ast2ron.rs"
 
 [dev-dependencies]
 paste = "1.0.5"
+pretty_assertions = "0.7.1"

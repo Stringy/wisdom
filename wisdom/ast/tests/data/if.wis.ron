@@ -1,0 +1,60 @@
+[
+    (
+        kind: Expr((
+            kind: Assign((
+                kind: Ident((
+                    name: "a",
+                )),
+            ), (
+                kind: Literal(Int(10)),
+            )),
+        )),
+    ),
+    (
+        kind: Expr((
+            kind: If((
+                kind: BinOp((
+                    kind: Ident((
+                        name: "a",
+                    )),
+                ), EqEq, (
+                    kind: Literal(Int(0)),
+                )),
+            ), (
+                stmts: [
+                    (
+                        kind: Expr((
+                            kind: Call((
+                                kind: Ident((
+                                    name: "print",
+                                )),
+                            ), [
+                                (
+                                    kind: Literal(String("0")),
+                                ),
+                            ]),
+                        )),
+                    ),
+                ],
+            ), Some((
+                kind: Block((
+                    stmts: [
+                        (
+                            kind: Expr((
+                                kind: Call((
+                                    kind: Ident((
+                                        name: "print",
+                                    )),
+                                ), [
+                                    (
+                                        kind: Literal(String("not 0")),
+                                    ),
+                                ]),
+                            )),
+                        ),
+                    ],
+                )),
+            ))),
+        )),
+    ),
+]

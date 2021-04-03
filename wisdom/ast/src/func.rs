@@ -14,6 +14,7 @@ pub struct Function {
     pub args: Vec<ArgSpec>,
     pub ret_typ: Option<Typ>,
     pub block: Block,
+    #[serde(skip)]
     pub position: Position,
 }
 
@@ -22,6 +23,7 @@ pub struct Function {
 pub struct ArgSpec {
     pub name: Ident,
     pub typ: Option<Typ>,
+    #[serde(skip)]
     pub position: Position,
 }
 
@@ -29,6 +31,7 @@ pub struct ArgSpec {
 #[derive(Serialize, Deserialize)]
 pub struct Block {
     pub stmts: Vec<Stmt>,
+    #[serde(skip)]
     pub position: Position,
 }
 

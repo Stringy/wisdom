@@ -9,13 +9,14 @@ use tokenizer::TokenKind::*;
 use crate::{BinOp, Block, Ident, Value};
 use crate::error::ErrorKind::UnmatchedExpr;
 use crate::error::ParserError;
-use crate::ext::VecDequePopTwo;
+use crate::ext::VecPopTwo;
 
 use serde::{Serialize, Deserialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Expr {
     pub kind: ExprKind,
+    #[serde(skip)]
     pub position: Position,
 }
 
@@ -81,8 +82,8 @@ impl Expr {
     /// Recursively parses an expression from the token stream.
     ///
     fn parse_expr(tokens: &TokenStream) -> Result<Self, ParserError> {
-        let mut operators: VecDeque<BinOp> = VecDeque::new();
-        let mut operands: VecDeque<Expr> = VecDeque::new();
+        let mut operators: Vec<BinOp> = Vec::new();
+        let mut operands: Vec<Expr> = Vec::new();
 
         let mut peeked = tokens.peek();
         while let Some(tok) = &peeked {
@@ -90,12 +91,14 @@ impl Expr {
                 Whitespace => {}
                 LeftParen => {
                     tokens.consume();
-                    operands.push_back(Expr::from_tokens(tokens)?);
+                    operands.push(Expr::from_tokens(tokens)?);
                     expect_or_error!(tokens, RightParen)?;
                 }
                 Literal { .. } => {
                     // TODO: perhaps a literal should just contain the string repr (and move Value somewhere else)
-                    operands.push_back(Expr::new(ExprKind::Literal(Value::from_tokens(tokens)?), tok.position.clone()))
+                    let value = Value::from_tokens(tokens)?;
+                    let value = ExprKind::Literal(value);
+                    operands.push(Expr::new(value, tok.position.clone()));
                 }
                 Identifier => {
                     match tok.literal.as_str() {
@@ -123,31 +126,47 @@ impl Expr {
                             return Ok(Expr::new(ExprKind::If(condition.into(), block, else_expr), tok.position.clone()));
                         }
                         _ => {
-                            operands.push_back(
-                                Expr::parse_ident(tok, tokens)?
-                            )
+                            operands.push(Expr::parse_ident(tok, tokens)?)
                         }
                     }
                 }
                 _ if tok.kind.is_operator() => {
                     let op = BinOp::from_tokens(tokens)?;
-                    if let Some(top) = operators.get(0) {
-                        if top.precendence() < op.precendence() {
-                            operators.push_back(op);
-                        } else {
-                            let (rhs, lhs) = operands.pop_back_two().ok_or(
-                                ParserError::new(UnmatchedExpr, Some(tok.position))
-                            )?;
-                            let position = lhs.position.clone();
-                            match op {
-                                BinOp::Eq => operands.push_back(Expr::new(ExprKind::Assign(lhs.into(), rhs.into()), position)),
-                                _ => operands.push_back(Expr::new(ExprKind::BinOp(lhs.into(), op, rhs.into()), position))
+
+                    if !operators.is_empty() {
+                        // keep checking against stored operators until we have a higher
+                        // precedence
+                        while let Some(top) = operators.get(0) {
+                            if top.precedence() <= op.precedence() {
+                                //
+                                // If the top of the stack has higher precedence
+                                // or the same as the current op, then we can process a tree.
+                                // We continue to do this until we hit an operator of lower precedence
+                                // in the stack.
+                                // TODO: this will need to be tweaked when we introduce right-associative operators
+                                //
+                                let (rhs, lhs) = operands.pop_two().ok_or(
+                                    ParserError::new(UnmatchedExpr, Some(tok.position))
+                                )?;
+                                let position = lhs.position.clone();
+                                let expr = ExprKind::BinOp(lhs.into(), *top, rhs.into());
+                                // pop the 'top' operator cos we've just used it
+                                operators.pop();
+                                // push the result for next operator / unwinding later
+                                operands.push(Expr::new(expr, position));
+                            } else {
+                                operators.push(op);
+                                break;
                             }
                         }
+                        // no operators left and we haven't added the current
+                        // operator so add it now
+                        if operators.is_empty() {
+                            operators.push(op);
+                        }
                     } else {
-                        // first operator or no previous operators, so always
-                        // push
-                        operators.push_back(op);
+                        // no operators so push
+                        operators.push(op);
                     }
                 }
                 _ => break,
@@ -156,17 +175,28 @@ impl Expr {
             peeked = tokens.peek();
         }
 
+        //
+        // Unwind the remaining expressions / operators in the stacks, to construct
+        // the full expression. This should be balanced (i.e. num_ops = (num_expr / 2); num_expr % 2 == 0)
+        // If it isn't then we've got an invalid expression.
+        //
         while operators.len() > 0 {
-            let op = operators.pop_back().ok_or(ParserError::new(UnmatchedExpr, tokens.position()))?;
-            let (rhs, lhs) = operands.pop_back_two().ok_or(ParserError::new(UnmatchedExpr, tokens.position()))?;
+            let op = operators.pop().ok_or(ParserError::new(UnmatchedExpr, tokens.position()))?;
+            let (rhs, lhs) = operands.pop_two().ok_or(ParserError::new(UnmatchedExpr, tokens.position()))?;
             let position = lhs.position.clone();
             match op {
-                BinOp::Eq => operands.push_back(Expr::new(ExprKind::Assign(lhs.into(), rhs.into()), position)),
-                _ => operands.push_back(Expr::new(ExprKind::BinOp(lhs.into(), op, rhs.into()), position))
+                BinOp::Eq => {
+                    let assign = ExprKind::Assign(lhs.into(), rhs.into());
+                    operands.push(Expr::new(assign, position));
+                }
+                _ => {
+                    let binop = ExprKind::BinOp(lhs.into(), op, rhs.into());
+                    operands.push(Expr::new(binop, position));
+                }
             }
         }
 
-        Ok(operands.pop_back().ok_or(ParserError::new(UnmatchedExpr, tokens.position()))?)
+        Ok(operands.pop().ok_or(ParserError::new(UnmatchedExpr, tokens.position()))?)
     }
 
     ///
@@ -198,7 +228,9 @@ impl Expr {
                 ));
             }
             _ => {
-                return Ok(Expr::new(ExprKind::Ident(ident.into()), ident.position.clone()));
+                let position = ident.position.clone();
+                let ident = ExprKind::Ident(ident.into());
+                return Ok(Expr::new(ident, position));
             }
         }
     }

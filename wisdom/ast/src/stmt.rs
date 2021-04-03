@@ -10,6 +10,7 @@ use serde::{Serialize, Deserialize};
 #[derive(Debug, Clone)]
 #[derive(Serialize, Deserialize)]
 pub struct Stmt {
+    #[serde(skip)]
     pub position: Position,
     pub kind: StmtKind,
 }

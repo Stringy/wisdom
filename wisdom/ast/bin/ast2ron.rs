@@ -1,12 +1,13 @@
 extern crate ast;
 extern crate tokenizer;
-extern crate serde_json;
+extern crate ron;
 
 use std::error::Error;
 use tokenizer::{TokenStream, FromTokens};
 use ast::Stmt;
 
 use std::path::Path;
+use ron::ser::PrettyConfig;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let path = std::env::args().nth(1).expect("Must provide path to .wis file");
@@ -16,8 +17,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     while !tokens.is_empty() {
         stmts.push(Stmt::from_tokens(&tokens).unwrap());
     }
-    let json_path = Path::new(&path).with_extension("json");
-    println!("{:?}", json_path);
-    std::fs::write(json_path, serde_json::to_string_pretty(&stmts)?)?;
+    let pretty = PrettyConfig::new();
+    println!("{}", ron::ser::to_string_pretty(&stmts, pretty)?);
     Ok(())
 }
