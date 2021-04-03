@@ -1,0 +1,42 @@
+[
+    (
+        kind: Expr((
+            kind: BinOp((
+                kind: BinOp((
+                    kind: Ident((
+                        name: "a",
+                    )),
+                ), Mul, (
+                    kind: BinOp((
+                        kind: Call((
+                            kind: Ident((
+                                name: "foo",
+                            )),
+                        ), [
+                            (
+                                kind: BinOp((
+                                    kind: BinOp((
+                                        kind: Literal(Int(1)),
+                                    ), Mul, (
+                                        kind: Literal(Int(256)),
+                                    )),
+                                ), Add, (
+                                    kind: Literal(Int(6)),
+                                )),
+                            ),
+                            (
+                                kind: Ident((
+                                    name: "bar",
+                                )),
+                            ),
+                        ]),
+                    ), Mul, (
+                        kind: Literal(Int(8)),
+                    )),
+                )),
+            ), Add, (
+                kind: Literal(Int(12)),
+            )),
+        )),
+    ),
+]

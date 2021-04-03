@@ -11,7 +11,7 @@ use wisdom::ast::Value;
 use wisdom::interpreter::error::{Error};
 use std::io::{self, BufRead};
 use std::fs::File;
-use wisdom::common::{Position, Describable, WisdomError};
+use wisdom::common::{Position, WisdomError};
 use rustyline::Editor;
 
 fn do_write(msg: &str) {
@@ -41,7 +41,7 @@ fn handle(err: Error, filename: &str) {
     let position = err.position();
     if let Ok(line) = get_line(filename, position.line - 1) {
         do_write(format!("{}:{}:{}\n", filename, position.line, position.column).as_str());
-        handle_err_with_line(err.description(), position, line);
+        handle_err_with_line(format!("{}", err), position, line);
     } else {
         panic!("Error occurred when handling an error. Damn.")
     }
@@ -58,6 +58,12 @@ fn main() {
             Arg::with_name("file")
                 .help("run a given wisdom file")
                 .takes_value(true)
+        )
+        .arg(
+            Arg::with_name("eval")
+                .short("e")
+                .help("run a given expression")
+                .takes_value(true)
         ).get_matches();
 
     match args.value_of("file") {
@@ -71,34 +77,46 @@ fn main() {
             }
         }
         None => {
-            use rustyline::error::ReadlineError::*;
-            do_write("Wisdom REPL (WELP) v1.0\n");
-            loop {
-                let input = rl.readline(">>> ");
-                match input {
-                    Ok(line) => {
-                        if line == "\n" || line.is_empty() {
-                            continue;
-                        }
+            match args.value_of("eval") {
+                Some(script) => {
+                    match interp.eval_script(script) {
+                        Ok(v) => do_write(format!("{}\n", v).as_str()),
+                        Err(e) => do_write(format!("{}\n", e).as_str()),
+                    }
+                }
+                None => {
+                    use rustyline::error::ReadlineError::*;
+                    do_write("Wisdom REPL (WELP) v1.0\n");
+                    loop {
+                        let input = rl.readline(">>> ");
+                        match input {
+                            Ok(line) => {
+                                if line == "\n" || line.is_empty() {
+                                    continue;
+                                }
 
-                        match interp.eval_line(line.as_str()) {
-                            Ok(v) => {
-                                if v != Value::None {
-                                    do_write(format!("{}\n", v).as_str())
+                                rl.add_history_entry(line.clone());
+
+                                match interp.eval_line(line.as_str()) {
+                                    Ok(v) => {
+                                        if v != Value::None {
+                                            do_write(format!("{}\n", v).as_str())
+                                        }
+                                    }
+                                    Err(e) => {
+                                        do_write(format!("{}\n", e).as_str())
+                                    }
                                 }
                             }
-                            Err(e) => {
-                                do_write(format!("{}\n", e.description()).as_str())
+                            Err(Interrupted) | Err(Eof) => {
+                                do_write("Exiting.\n");
+                                break;
+                            }
+                            Err(err) => {
+                                do_write(format!("Input error: {}\n", err).as_str());
+                                break;
                             }
                         }
-                    }
-                    Err(Interrupted) | Err(Eof) => {
-                        do_write("Exiting.\n");
-                        break;
-                    }
-                    Err(err) => {
-                        do_write(format!("Input error: {}\n", err).as_str());
-                        break;
                     }
                 }
             }

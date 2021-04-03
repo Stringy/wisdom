@@ -1,12 +1,13 @@
-# TODOs (16)
+# TODOs (17)
  * [welp/src/main.rs](welp/src/main.rs) (1)
    * `// TODO: support reading from file`
  * [wisdom/ast/src/error.rs](wisdom/ast/src/error.rs) (1)
    * `// TODO: make ExpectedTokens description not a debug thing`
- * [wisdom/ast/src/expr.rs](wisdom/ast/src/expr.rs) (4)
+ * [wisdom/ast/src/expr.rs](wisdom/ast/src/expr.rs) (5)
    * `// TODO: AssignOp(Expr, Expr),`
    * `// TODO: more error construction helpers would be very useful`
    * `// TODO: perhaps a literal should just contain the string repr (and move Value somewhere else)`
+   * `// TODO: this will need to be tweaked when we introduce right-associative operators`
    * `// TODO: definitely need a better way of constructing these`
  * [wisdom/ast/src/func.rs](wisdom/ast/src/func.rs) (1)
    * `// TODO: add return types`

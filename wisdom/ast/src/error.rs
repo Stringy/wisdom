@@ -1,6 +1,8 @@
-use std::fmt::Debug;
+use std::error::Error;
+use std::fmt::{Debug, Formatter};
+use std::fmt::{self, Display};
 
-use common::{Describable, Position, WisdomError};
+use common::{Position, WisdomError};
 use tokenizer::TokenKind;
 
 #[derive(PartialOrd, PartialEq, Debug, Clone, Copy)]
@@ -9,9 +11,9 @@ pub struct ParserError {
     pub position: Option<Position>,
 }
 
-impl Describable for ParserError {
-    fn description(&self) -> String {
-        match self.kind {
+impl Display for ParserError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        let desc = match self.kind {
             ErrorKind::InvalidToken(tok) => format!("invalid token: {:?}", tok),
             ErrorKind::InvalidLit => format!("invalid literal"),
             ErrorKind::UnexpectedEOL => format!("unexpected end-of-line"),
@@ -23,7 +25,8 @@ impl Describable for ParserError {
                 // TODO: make ExpectedTokens description not a debug thing
                 format!("expected one of {:?}", tokens)
             }
-        }
+        };
+        write!(f, "{} {}", self.position.unwrap_or_default(), desc)
     }
 }
 
@@ -32,6 +35,8 @@ impl WisdomError for ParserError {
         self.position.unwrap_or_default()
     }
 }
+
+impl Error for ParserError {}
 
 #[derive(PartialOrd, PartialEq, Debug, Clone, Copy)]
 pub enum ErrorKind {

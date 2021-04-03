@@ -5,25 +5,33 @@ use crate::{Ident, Stmt, Typ};
 use crate::error::ErrorKind::ExpectedIdent;
 use crate::error::ParserError;
 
+use serde::{Serialize, Deserialize};
+
 #[derive(Clone, Debug)]
+#[derive(Serialize, Deserialize)]
 pub struct Function {
     pub ident: Ident,
     pub args: Vec<ArgSpec>,
     pub ret_typ: Option<Typ>,
     pub block: Block,
+    #[serde(skip)]
     pub position: Position,
 }
 
 #[derive(Clone, Debug)]
+#[derive(Serialize, Deserialize)]
 pub struct ArgSpec {
     pub name: Ident,
     pub typ: Option<Typ>,
+    #[serde(skip)]
     pub position: Position,
 }
 
 #[derive(Clone, Debug)]
+#[derive(Serialize, Deserialize)]
 pub struct Block {
     pub stmts: Vec<Stmt>,
+    #[serde(skip)]
     pub position: Position,
 }
 

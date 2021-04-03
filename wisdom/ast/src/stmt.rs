@@ -5,13 +5,18 @@ use crate::{Expr, Function};
 use crate::error::ErrorKind::UnexpectedEOL;
 use crate::error::ParserError;
 
+use serde::{Serialize, Deserialize};
+
 #[derive(Debug, Clone)]
+#[derive(Serialize, Deserialize)]
 pub struct Stmt {
+    #[serde(skip)]
     pub position: Position,
     pub kind: StmtKind,
 }
 
 #[derive(Debug, Clone)]
+#[derive(Serialize, Deserialize)]
 pub enum StmtKind {
     Expr(Expr),
     Fn(Function),

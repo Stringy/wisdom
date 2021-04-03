@@ -1,10 +1,12 @@
 use std::fmt;
 use std::fmt::Display;
 
+use serde::{Serialize, Deserialize};
+
 ///
 /// A position describes a place in the source code.
 ///
-#[derive(Copy, Clone, PartialOrd, PartialEq, Debug)]
+#[derive(Copy, Clone, PartialOrd, PartialEq, Debug, Serialize, Deserialize)]
 pub struct Position {
     pub line: usize,
     pub column: usize,

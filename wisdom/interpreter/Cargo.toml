@@ -10,3 +10,4 @@ edition = "2018"
 ast = { path = "../ast" }
 tokenizer = { path = "../tokenizer" }
 common = { path = "../common" }
+ron = "0.6.4"

@@ -1,0 +1,46 @@
+[
+    (
+        kind: Expr((
+            kind: Assign((
+                kind: Ident((
+                    name: "a",
+                )),
+            ), (
+                kind: Literal(Int(10)),
+            )),
+        )),
+    ),
+    (
+        kind: Expr((
+            kind: While((
+                kind: BinOp((
+                    kind: Ident((
+                        name: "a",
+                    )),
+                ), Gt, (
+                    kind: Literal(Int(0)),
+                )),
+            ), (
+                stmts: [
+                    (
+                        kind: Expr((
+                            kind: Assign((
+                                kind: Ident((
+                                    name: "a",
+                                )),
+                            ), (
+                                kind: BinOp((
+                                    kind: Ident((
+                                        name: "a",
+                                    )),
+                                ), Sub, (
+                                    kind: Literal(Int(1)),
+                                )),
+                            )),
+                        )),
+                    ),
+                ],
+            )),
+        )),
+    ),
+]

@@ -1,0 +1,75 @@
+[
+    (
+        kind: Fn((
+            ident: (
+                name: "foo",
+            ),
+            args: [
+                (
+                    name: (
+                        name: "a",
+                    ),
+                    typ: Some((
+                        ident: (
+                            name: "int",
+                        ),
+                    )),
+                ),
+                (
+                    name: (
+                        name: "b",
+                    ),
+                    typ: Some((
+                        ident: (
+                            name: "str",
+                        ),
+                    )),
+                ),
+            ],
+            ret_typ: None,
+            block: (
+                stmts: [
+                    (
+                        kind: Expr((
+                            kind: Call((
+                                kind: Ident((
+                                    name: "print",
+                                )),
+                            ), [
+                                (
+                                    kind: Ident((
+                                        name: "a",
+                                    )),
+                                ),
+                                (
+                                    kind: Literal(String(", ")),
+                                ),
+                                (
+                                    kind: Ident((
+                                        name: "b",
+                                    )),
+                                ),
+                            ]),
+                        )),
+                    ),
+                ],
+            ),
+        )),
+    ),
+    (
+        kind: Expr((
+            kind: Call((
+                kind: Ident((
+                    name: "foo",
+                )),
+            ), [
+                (
+                    kind: Literal(Int(1)),
+                ),
+                (
+                    kind: Literal(String("thing")),
+                ),
+            ]),
+        )),
+    ),
+]

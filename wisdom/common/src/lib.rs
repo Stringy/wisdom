@@ -1,16 +1,16 @@
-pub use position::*;
+extern crate serde;
+
 
 mod position;
 
-pub trait Describable {
-    fn description(&self) -> String;
-}
+pub use position::*;
+use std::error::Error;
 
 ///
 /// WisdomError is a trait for defining Error types throughout
 /// Wisdom, its library, and interpreters / the REPL.
 ///
-pub trait WisdomError: Describable + Sized {
+pub trait WisdomError: Error + Sized {
     ///
     /// Return the position in the source code that this error occurred
     ///
