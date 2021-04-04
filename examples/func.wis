@@ -1,14 +1,18 @@
 fn foo() {
-    print("Hello, world");
+    return "Hello, World";
 }
 
 fn bar(a: int, b: int) {
-    print(a + b);
-    print(a + b * 50);
+    if a > b {
+        return a;
+    } else {
+        return b;
+    }
 }
 
 a = 1;
-foo();
-bar(a, 2);
+b = 20;
+print(foo());
+print(bar(a, 0));
+print(bar(0, b));
 
-print(foo, " ", bar);
