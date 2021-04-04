@@ -3,7 +3,7 @@ use wisdom::ast::Value;
 use wisdom::interpreter::*;
 use wisdom::interpreter::error::ErrorKind::UndefinedVar;
 
-fn run_script(script: &str, expect: Result<Value, Error>) {
+fn run_script(script: &str, expect: std::result::Result<Value, Error>) {
     let mut itp = SlowInterpreter::new();
     let result = itp.eval_script(script);
     assert_eq!(result, expect);

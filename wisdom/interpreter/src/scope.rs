@@ -56,8 +56,9 @@ impl Context {
     }
 
     ///
-    /// Stores a value associated with a name into the top scope
-    /// on the stack.
+    /// Stores a variable and its value into the scope. If it exists
+    /// in the context, it is overwritten with the new value.
+    /// If it doesn't exist, then it is added to the top scope.
     ///
     pub fn store(&self, name: String, value: Value) {
         if let Some(_) = self.lookup(&name) {
@@ -67,15 +68,23 @@ impl Context {
                 }
             }
         } else {
-            let mut scopes = self.scopes.borrow_mut();
-            let end = scopes.len();
-            let scope = scopes.get_mut(end - 1);
-            match scope {
-                Some(scope) => {
-                    scope.insert(name, value);
-                }
-                None => panic!("there should always be at least one scope")
+            self.store_top(name, value)
+        }
+    }
+
+    ///
+    /// Inserts a new variable in the top scope, most useful
+    /// for pushing function arguments.
+    ///
+    pub fn store_top(&self, name: String, value: Value) {
+        let mut scopes = self.scopes.borrow_mut();
+        let end = scopes.len();
+        let scope = scopes.get_mut(end - 1);
+        match scope {
+            Some(scope) => {
+                scope.insert(name, value);
             }
+            None => panic!("there should always be at least one scope")
         }
     }
 }

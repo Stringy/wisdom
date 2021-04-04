@@ -43,6 +43,8 @@ pub enum ExprKind {
     Literal(Value),
     /// A named identifier (variable)
     Ident(Ident),
+    /// A return statement
+    Ret(Box<Expr>),
 }
 
 impl Debug for ExprKind {
@@ -56,6 +58,7 @@ impl Debug for ExprKind {
             ExprKind::While(_, _) => write!(f, "ExprKind::While"),
             ExprKind::If(_, _, _) => write!(f, "ExprKind::If"),
             ExprKind::Block(_) => write!(f, "ExprKind::Block"),
+            ExprKind::Ret(_) => write!(f, "ExprKind::Ret"),
         }
     }
 }
@@ -123,6 +126,11 @@ impl Expr {
                             };
 
                             return Ok(Expr::new(ExprKind::If(condition.into(), block, else_expr), tok.position.clone()));
+                        }
+                        "return" => {
+                            tokens.consume();
+                            let expr = Expr::parse_expr(tokens)?;
+                            return Ok(Expr::new(ExprKind::Ret(expr.into()), tok.position.clone()));
                         }
                         _ => {
                             operands.push(Expr::parse_ident(tok, tokens)?)
