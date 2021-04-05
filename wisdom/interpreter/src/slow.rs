@@ -6,7 +6,7 @@ use tokenizer::{FromTokens, TokenStream};
 
 use crate::{builtin, Interpreter};
 use crate::error::Error;
-use crate::error::ErrorKind::{InvalidAssignment, NotCallable, UndefinedVar, UnexpectedArgs};
+use crate::error::ErrorKind::{InvalidAssignment, NotCallable, UndefinedVar, UnexpectedArgs, BreakInWrongContext};
 use crate::scope::Context;
 use crate::value::Operations;
 
@@ -14,6 +14,7 @@ use crate::value::Operations;
 enum VarContext<T: Clone> {
     Ret(T),
     Norm(T),
+    Break,
 }
 
 impl Into<VarContext<Value>> for Value {
@@ -27,7 +28,7 @@ macro_rules! vctx {
         {
             let v = $value;
             match &v {
-                VarContext::Ret(_) => return Ok(v),
+                VarContext::Ret(_) | VarContext::Break => return Ok(v),
                 VarContext::Norm(n) => n.clone(),
             }
         }
@@ -117,6 +118,9 @@ impl SlowInterpreter {
                 let ret = VarContext::Ret(vctx!(self.visit_expr(expr)?));
                 Ok(ret)
             }
+            Break(_) => {
+                Ok(VarContext::Break)
+            }
         }
     }
 
@@ -134,7 +138,11 @@ impl SlowInterpreter {
 
     fn visit_while(&self, cond: &Expr, block: &Block) -> Result {
         while vctx!(self.visit_expr(cond)?).into_bool() {
-            self.visit_block(block)?;
+            let n = self.visit_block(block)?;
+            match n {
+                VarContext::Break => break,
+                _ => {}
+            }
         }
         Ok(VarContext::Norm(Value::None))
     }
@@ -146,6 +154,9 @@ impl SlowInterpreter {
         for stmt in &block.stmts {
             result = match self.visit_stmt(stmt)? {
                 VarContext::Norm(v) => v,
+                VarContext::Break => {
+                    return Ok(VarContext::Break);
+                }
                 VarContext::Ret(v) => {
                     self.globals.pop();
                     return Ok(VarContext::Ret(v));
@@ -168,6 +179,10 @@ impl SlowInterpreter {
         for stmt in &func.block.stmts {
             result = match self.visit_stmt(stmt)? {
                 VarContext::Norm(v) => v,
+                VarContext::Break => {
+                    // if this is handled at this level, then it's definitely wrong
+                    return Err(Error::new(BreakInWrongContext));
+                }
                 VarContext::Ret(v) => {
                     result = v;
                     break;
@@ -208,6 +223,7 @@ impl SlowInterpreter {
     fn visit_op(&self, lhs: Value, op: BinOp, rhs: Value) -> Result {
         use BinOp::*;
         let result = match op {
+            Mod => lhs.try_mod(&rhs)?,
             Add => lhs.try_add(&rhs)?,
             Sub => lhs.try_sub(&rhs)?,
             Mul => lhs.try_mul(&rhs)?,
@@ -242,6 +258,7 @@ impl Interpreter<Value, Error> for SlowInterpreter {
             let stmt = Stmt::from_tokens(&tokens)?;
             result = match self.visit_stmt(&stmt)? {
                 VarContext::Norm(n) => n,
+                VarContext::Break => return Err(Error::new(BreakInWrongContext)),
                 VarContext::Ret(n) => {
                     result = n;
                     break;

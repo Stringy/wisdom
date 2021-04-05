@@ -27,6 +27,7 @@ pub enum BinOp {
     Xor,
     BinAnd,
     BinOr,
+    Mod,
 }
 
 impl BinOp {
@@ -37,7 +38,7 @@ impl BinOp {
     pub fn precedence(self) -> usize {
         use BinOp::*;
         match self {
-            Mul | Div => 3,
+            Mul | Div | Mod => 3,
             Add | Sub => 4,
             Lt | LtEq | Gt | GtEq => 6,
             EqEq | NotEq => 7,
@@ -69,7 +70,8 @@ impl Display for BinOp {
             BinOp::Xor => write!(f, "^")?,
             BinOp::BinAnd => write!(f, "&")?,
             BinOp::BinOr => write!(f, "|")?,
-            BinOp::Eq => write!(f, "=")?
+            BinOp::Eq => write!(f, "=")?,
+            BinOp::Mod => write!(f, "%")?
         };
         Ok(())
     }
@@ -80,6 +82,7 @@ impl FromStr for BinOp {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(match s {
+            "%" => Self::Mod,
             "+" => Self::Add,
             "-" => Self::Sub,
             "*" => Self::Mul,

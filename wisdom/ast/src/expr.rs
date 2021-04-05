@@ -48,6 +48,8 @@ pub enum ExprKind {
     Ident(Ident),
     /// A return statement
     Ret(Box<Expr>),
+    /// A break expression, with optional label.
+    Break(Option<Ident>),
 }
 
 impl Debug for ExprKind {
@@ -63,6 +65,7 @@ impl Debug for ExprKind {
             ExprKind::If(_, _, _) => write!(f, "ExprKind::If"),
             ExprKind::Block(_) => write!(f, "ExprKind::Block"),
             ExprKind::Ret(_) => write!(f, "ExprKind::Ret"),
+            ExprKind::Break(_) => write!(f, "ExprKind::Break"),
         }
     }
 }
@@ -108,6 +111,7 @@ impl Expr {
                 }
                 Identifier => {
                     match tok.literal.as_str() {
+                        // TODO: better way of doing this kind of literal processing?
                         "true" | "false" => {
                             let value = Value::from_tokens(tokens)?;
                             let value = ExprKind::Literal(value);
@@ -117,6 +121,7 @@ impl Expr {
                         "if" => return Expr::parse_if(tokens),
                         "return" => return Expr::parse_return(tokens),
                         "let" => return Expr::parse_let(tokens),
+                        "break" => return Expr::parse_break(tokens),
                         _ => {
                             operands.push(Expr::parse_ident(tok, tokens)?)
                         }
@@ -184,6 +189,15 @@ impl Expr {
         }
 
         Ok(operands.pop().ok_or(ParserError::new(UnmatchedExpr, tokens.position()))?)
+    }
+
+    ///
+    /// Parse a break expression from the token stream. Expects that the stream is
+    /// on the 'break' identifier
+    ///
+    fn parse_break(tokens: &TokenStream) -> Result<Self, ParserError> {
+        let tok = tokens.consume().expect("expected 'break' identifier token");
+        Ok(Expr::new(ExprKind::Break(None), tok.position))
     }
 
     ///

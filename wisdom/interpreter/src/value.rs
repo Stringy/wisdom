@@ -4,6 +4,7 @@ use crate::error::Error;
 use crate::error::ErrorKind::InvalidType;
 
 pub trait Operations {
+    fn try_mod(&self, rhs: &Value) -> Result<Value, Error>;
     fn try_add(&self, rhs: &Value) -> Result<Value, Error>;
     fn try_sub(&self, rhs: &Value) -> Result<Value, Error>;
     fn try_mul(&self, rhs: &Value) -> Result<Value, Error>;
@@ -20,6 +21,25 @@ pub trait Operations {
 }
 
 impl Operations for Value {
+    fn try_mod(&self, rhs: &Value) -> Result<Value, Error> {
+        match self {
+            Value::Int(n) => {
+                match rhs {
+                    Value::Int(m) => Ok(Value::Int(n % m)),
+                    Value::Float(m) => Ok(Value::Float(*n as f64 % m)),
+                    _ => Err(Error::new(InvalidType))
+                }
+            }
+            Value::Float(n) => {
+                match rhs {
+                    Value::Int(m) => Ok(Value::Float(n % *m as f64)),
+                    Value::Float(m) => Ok(Value::Float(n % m)),
+                    _ => Err(Error::new(InvalidType))
+                }
+            }
+            _ => Err(Error::new(InvalidType))
+        }
+    }
     ///
     /// Attempts to add two values together.
     ///

@@ -28,6 +28,7 @@ impl Error {
             ErrorKind::UnexpectedArgs(exp, act) => format!("Expected {} args, got {}", exp, act),
             ErrorKind::InvalidAssignment => format!("Invalid assignment"),
             ErrorKind::NotCallable => format!("not callable"),
+            ErrorKind::BreakInWrongContext => format!("unable to use 'break' in this context")
         }
     }
 }
@@ -50,6 +51,7 @@ pub enum ErrorKind {
     NotCallable,
     IOError(String),
     UnexpectedArgs(usize, usize),
+    BreakInWrongContext,
 }
 
 impl From<ParserError> for Error {
