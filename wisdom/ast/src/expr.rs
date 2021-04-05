@@ -108,45 +108,15 @@ impl Expr {
                 }
                 Identifier => {
                     match tok.literal.as_str() {
-                        "while" => {
-                            tokens.consume();
-                            let condition = Expr::parse_expr(tokens)?;
-                            let block = Block::from_tokens(tokens)?;
-                            return Ok(Expr::new(ExprKind::While(condition.into(), block), tok.position.clone()));
+                        "true" | "false" => {
+                            let value = Value::from_tokens(tokens)?;
+                            let value = ExprKind::Literal(value);
+                            operands.push(Expr::new(value, tok.position.clone()));
                         }
-                        "if" => {
-                            tokens.consume();
-                            let condition = Expr::parse_expr(tokens)?;
-                            let block = Block::from_tokens(tokens)?;
-                            let else_expr = if let Some(tok) = tokens.peek_ident("else") {
-                                tokens.consume();
-                                if let Some(_) = tokens.peek_ident("if") {
-                                    Some(Box::new(Expr::parse_expr(tokens)?))
-                                } else {
-                                    Some(Box::new(Expr::new(ExprKind::Block(Block::from_tokens(tokens)?), tok.position.clone())))
-                                }
-                            } else {
-                                None
-                            };
-
-                            return Ok(Expr::new(ExprKind::If(condition.into(), block, else_expr), tok.position.clone()));
-                        }
-                        "return" => {
-                            tokens.consume();
-                            let expr = Expr::parse_expr(tokens)?;
-                            return Ok(Expr::new(ExprKind::Ret(expr.into()), tok.position.clone()));
-                        }
-                        "let" => {
-                            tokens.consume();
-                            let ident = expect_or_error!(tokens, Identifier)?;
-                            let expr = if let Some(_) = tokens.expect(TokenKind::Eq) {
-                                // we expect either nothing, or =
-                                Some(Box::new(Expr::parse_expr(tokens)?))
-                            } else {
-                                None
-                            };
-                            return Ok(Expr::new(ExprKind::Let((&ident).into(), expr), tok.position));
-                        }
+                        "while" => return Expr::parse_while(tokens),
+                        "if" => return Expr::parse_if(tokens),
+                        "return" => return Expr::parse_return(tokens),
+                        "let" => return Expr::parse_let(tokens),
                         _ => {
                             operands.push(Expr::parse_ident(tok, tokens)?)
                         }
@@ -206,19 +176,73 @@ impl Expr {
             let op = operators.pop().ok_or(ParserError::new(UnmatchedExpr, tokens.position()))?;
             let (rhs, lhs) = operands.pop_two().ok_or(ParserError::new(UnmatchedExpr, tokens.position()))?;
             let position = lhs.position.clone();
-            match op {
-                BinOp::Eq => {
-                    let assign = ExprKind::Assign(lhs.into(), rhs.into());
-                    operands.push(Expr::new(assign, position));
-                }
-                _ => {
-                    let binop = ExprKind::BinOp(lhs.into(), op, rhs.into());
-                    operands.push(Expr::new(binop, position));
-                }
-            }
+            let kind = match op {
+                BinOp::Eq => ExprKind::Assign(lhs.into(), rhs.into()),
+                _ => ExprKind::BinOp(lhs.into(), op, rhs.into())
+            };
+            operands.push(Expr::new(kind, position));
         }
 
         Ok(operands.pop().ok_or(ParserError::new(UnmatchedExpr, tokens.position()))?)
+    }
+
+    ///
+    /// Parse an if expression (including optional else) from the token
+    /// stream. Expects that the stream is currently on the 'if' identifier.
+    ///
+    fn parse_if(tokens: &TokenStream) -> Result<Self, ParserError> {
+        // consume the if
+        let tok = tokens.consume().expect("expected 'if' identifier token");
+        let condition = Expr::parse_expr(tokens)?;
+        let block = Block::from_tokens(tokens)?;
+        let else_expr = if let Some(tok) = tokens.peek_ident("else") {
+            tokens.consume();
+            if let Some(_) = tokens.peek_ident("if") {
+                Some(Box::new(Expr::parse_expr(tokens)?))
+            } else {
+                Some(Box::new(Expr::new(ExprKind::Block(Block::from_tokens(tokens)?), tok.position.clone())))
+            }
+        } else {
+            None
+        };
+
+        Ok(Expr::new(ExprKind::If(condition.into(), block, else_expr), tok.position.clone()))
+    }
+
+    ///
+    /// Parses a while loop, including its condition and block, from the token stream.
+    /// Expects that the stream is currently on the while identifier
+    ///
+    fn parse_while(tokens: &TokenStream) -> Result<Self, ParserError> {
+        let tok = tokens.consume().expect("expected 'while' identifier token");
+        let condition = Expr::parse_expr(tokens)?;
+        let block = Block::from_tokens(tokens)?;
+        Ok(Expr::new(ExprKind::While(condition.into(), block), tok.position.clone()))
+    }
+
+    ///
+    /// Parses a return. Expects that the stream is currently on the return identifier.
+    ///
+    fn parse_return(tokens: &TokenStream) -> Result<Self, ParserError> {
+        let tok = tokens.consume().expect("expected 'return' identifier token");
+        let expr = Expr::parse_expr(tokens)?;
+        Ok(Expr::new(ExprKind::Ret(expr.into()), tok.position.clone()))
+    }
+
+    ///
+    /// Parses a local (let) binding from the token stream.
+    /// Expects that the stream is currently on the let identifier.
+    ///
+    fn parse_let(tokens: &TokenStream) -> Result<Self, ParserError> {
+        let tok = tokens.consume().expect("expected 'let' identifier token");
+        let ident = expect_or_error!(tokens, Identifier)?;
+        let expr = if let Some(_) = tokens.expect(TokenKind::Eq) {
+            // we expect either nothing, or =
+            Some(Box::new(Expr::parse_expr(tokens)?))
+        } else {
+            None
+        };
+        Ok(Expr::new(ExprKind::Let((&ident).into(), expr), tok.position))
     }
 
     ///
