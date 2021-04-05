@@ -1,0 +1,22 @@
+
+fn primes_slow(limit: int) {
+    let count = 2;
+    let result = 0;
+    while count < limit {
+        let top = count / 2;
+        let n = 2;
+        while n < top {
+            if count % n == 0 {
+                break;
+            }
+            n = n + 1;
+        }
+        if n > top {
+            result = result + 1;
+        }
+        count = count + 1;
+    }
+    return result;
+}
+
+print("found: ", primes_slow(10000), " primes");
