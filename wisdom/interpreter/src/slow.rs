@@ -134,8 +134,8 @@ impl SlowInterpreter {
             result = match self.visit_stmt(stmt)? {
                 VarContext::Norm(v) => v,
                 VarContext::Ret(v) => {
-                    result = v;
-                    break;
+                    self.globals.pop();
+                    return Ok(VarContext::Ret(v));
                 }
             }
         }

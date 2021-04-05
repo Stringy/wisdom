@@ -69,3 +69,21 @@ a
 "#;
     run_script(script, Ok(Value::Int(0)));
 }
+
+#[test]
+fn test_return_stmt() {
+    let script = r#"
+fn max(a, b) {
+    if a > b {
+        return a;
+    }
+    return b;
+}
+"#.to_owned();
+    let mut max_a = script.clone();
+    max_a.push_str("max(20, 10)");
+    let mut max_b = script.clone();
+    max_b.push_str("max(10, 20);");
+    run_script(&max_a, Ok(Value::Int(20)));
+    run_script(&max_b, Ok(Value::Int(20)));
+}
