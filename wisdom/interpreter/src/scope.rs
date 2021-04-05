@@ -56,6 +56,13 @@ impl Context {
     }
 
     ///
+    /// Checks whether a given name exists in the context
+    ///
+    pub fn exists(&self, name: &String) -> bool {
+        self.lookup(name).is_some()
+    }
+
+    ///
     /// Stores a variable and its value into the scope. If it exists
     /// in the context, it is overwritten with the new value.
     /// If it doesn't exist, then it is added to the top scope.

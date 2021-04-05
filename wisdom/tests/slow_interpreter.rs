@@ -17,7 +17,7 @@ fn test_simple_expression() {
 #[test]
 fn test_assignment() {
     let script = r#"
-a = 123;
+let a = 123;
 a
 "#;
     run_script(script, Ok(Value::Int(123)));
@@ -26,7 +26,7 @@ a
 #[test]
 fn test_loop() {
     let script = r#"
-a = 1;
+let a = 1;
 while a < 10 {
     a = a + 1;
 }
@@ -38,9 +38,9 @@ a
 #[test]
 fn test_scope() {
     let script = r#"
-a = 10;
+let a = 10;
 while a > 0 {
-    b = 1;
+    let b = 1;
     a = a - b;
 }
 b
@@ -51,8 +51,8 @@ b
 #[test]
 fn test_multi_binop() {
     let script = r#"
-a = 10;
-b = a < 10 && a > 5;
+let a = 10;
+let b = a < 10 && a > 5;
 b
 "#;
     run_script(script, Ok(Value::Bool(false)));
@@ -61,7 +61,7 @@ b
 #[test]
 fn test_multi_in_if() {
     let script = r#"
-a = 0;
+let a = 0;
 if a < 10 && a > 5 {
     a = 10;
 }
@@ -105,4 +105,9 @@ fn func() {
     assert_eq!(Ok(Value::Int(1337)), intp.eval_script("func()"));
     // ensure it hasn't affected the value of a
     assert_eq!(Ok(Value::Int(20)), intp.eval_script("a"));
+}
+
+#[test]
+fn test_no_let_local_assignment() {
+    run_script("a = 10;", Err(Error::new(UndefinedVar("a".to_ascii_lowercase()))));
 }

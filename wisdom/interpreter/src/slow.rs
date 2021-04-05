@@ -74,9 +74,13 @@ impl SlowInterpreter {
             Assign(lhs, rhs) => {
                 match &lhs.kind {
                     Ident(ident) => {
-                        let value = self.visit_expr(rhs)?;
-                        self.globals.store(ident.name.clone(), vctx!(value));
-                        Ok(VarContext::Norm(Value::None))
+                        if self.globals.exists(&ident.name) {
+                            let value = self.visit_expr(rhs)?;
+                            self.globals.store(ident.name.clone(), vctx!(value));
+                            Ok(VarContext::Norm(Value::None))
+                        } else {
+                            Err(Error::new(UndefinedVar(ident.name.clone())))
+                        }
                     }
                     _ => {
                         Err(Error::new(InvalidAssignment))
