@@ -20,6 +20,17 @@ impl Context {
     }
 
     ///
+    /// Allows the caller to run a function within a new scope and to ensure that
+    /// as soon as the scope has ended, it is popped from this context.
+    ///
+    pub fn scoped<R, E>(&self, func: impl Fn() -> Result<R, E>) -> Result<R, E> {
+        self.push();
+        let result = func();
+        self.pop();
+        result
+    }
+
+    ///
     /// Push a new scope to the context, so that subsequent
     /// variable storage will be placed in this new scope.
     ///

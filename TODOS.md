@@ -1,4 +1,4 @@
-# TODOs (21)
+# TODOs (20)
  * [welp/src/main.rs](welp/src/main.rs) (1)
    * `// TODO: support reading from file`
  * [wisdom/ast/src/error.rs](wisdom/ast/src/error.rs) (1)
@@ -19,10 +19,9 @@
    * `// TODO: add some tests for all operations`
  * [wisdom/interpreter/src/error.rs](wisdom/interpreter/src/error.rs) (1)
    * `// TODO: update to use an actual position`
- * [wisdom/interpreter/src/slow.rs](wisdom/interpreter/src/slow.rs) (3)
+ * [wisdom/interpreter/src/slow.rs](wisdom/interpreter/src/slow.rs) (2)
    * `// TODO: add labels to break statements`
    * `// TODO: add labels to continue statements`
-   * `// TODO: macro this globals push/pop pattern? scope! { ... };`
  * [wisdom/tests/slow_interpreter.rs](wisdom/tests/slow_interpreter.rs) (1)
    * `// TODO: improve integration test rig so I can add more tests more easily.`
  * [wisdom/tokenizer/src/cursor.rs](wisdom/tokenizer/src/cursor.rs) (3)

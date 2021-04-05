@@ -155,57 +155,53 @@ impl SlowInterpreter {
     }
 
     fn visit_block(&self, block: &Block) -> Result {
-        // TODO: macro this globals push/pop pattern? scope! { ... };
-        self.globals.push();
-        let mut result = Value::None;
-        for stmt in &block.stmts {
-            result = match self.visit_stmt(stmt)? {
-                VarContext::Norm(v) => v,
-                VarContext::Break => {
-                    self.globals.pop();
-                    return Ok(VarContext::Break);
-                }
-                VarContext::Continue => {
-                    self.globals.pop();
-                    return Ok(VarContext::Continue);
-                }
-                VarContext::Ret(v) => {
-                    self.globals.pop();
-                    return Ok(VarContext::Ret(v));
+        self.globals.scoped(|| {
+            let mut result = Value::None;
+            for stmt in &block.stmts {
+                result = match self.visit_stmt(stmt)? {
+                    VarContext::Norm(v) => v,
+                    VarContext::Break => {
+                        return Ok(VarContext::Break);
+                    }
+                    VarContext::Continue => {
+                        return Ok(VarContext::Continue);
+                    }
+                    VarContext::Ret(v) => {
+                        return Ok(VarContext::Ret(v));
+                    }
                 }
             }
-        }
-        self.globals.pop();
-        Ok(VarContext::Norm(result))
+            Ok(VarContext::Norm(result))
+        })
     }
 
     fn visit_function(&self, func: &Function, args: &Vec<Value>) -> Result {
-        self.globals.push();
-        let mut result = Value::None;
-        for (i, arg) in args.iter().enumerate() {
-            self.globals.store_top(
-                func.args.get(i).unwrap().name.name.to_owned(),
-                arg.clone(),
-            );
-        }
-        for stmt in &func.block.stmts {
-            result = match self.visit_stmt(stmt)? {
-                VarContext::Norm(v) => v,
-                VarContext::Break => {
-                    // if this is handled at this level, then it's definitely wrong
-                    return Err(Error::new(BreakInWrongContext));
-                }
-                VarContext::Continue => {
-                    return Err(Error::new(ContinueInWrongContext));
-                }
-                VarContext::Ret(v) => {
-                    result = v;
-                    break;
+        self.globals.scoped(|| {
+            let mut result = Value::None;
+            for (i, arg) in args.iter().enumerate() {
+                self.globals.store_top(
+                    func.args.get(i).unwrap().name.name.to_owned(),
+                    arg.clone(),
+                );
+            }
+            for stmt in &func.block.stmts {
+                result = match self.visit_stmt(stmt)? {
+                    VarContext::Norm(v) => v,
+                    VarContext::Break => {
+                        // if this is handled at this level, then it's definitely wrong
+                        return Err(Error::new(BreakInWrongContext));
+                    }
+                    VarContext::Continue => {
+                        return Err(Error::new(ContinueInWrongContext));
+                    }
+                    VarContext::Ret(v) => {
+                        result = v;
+                        break;
+                    }
                 }
             }
-        }
-        self.globals.pop();
-        Ok(VarContext::Norm(result))
+            Ok(VarContext::Norm(result))
+        })
     }
 
     fn visit_call(&self, name: &String, args: &Vec<Box<Expr>>) -> Result {
