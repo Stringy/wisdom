@@ -158,17 +158,10 @@ impl SlowInterpreter {
         self.globals.scoped(|| {
             let mut result = Value::None;
             for stmt in &block.stmts {
-                result = match self.visit_stmt(stmt)? {
-                    VarContext::Norm(v) => v,
-                    VarContext::Break => {
-                        return Ok(VarContext::Break);
-                    }
-                    VarContext::Continue => {
-                        return Ok(VarContext::Continue);
-                    }
-                    VarContext::Ret(v) => {
-                        return Ok(VarContext::Ret(v));
-                    }
+                let vc = self.visit_stmt(stmt)?;
+                result = match &vc {
+                    VarContext::Norm(v) => v.clone(),
+                    _ => return Ok(vc)
                 }
             }
             Ok(VarContext::Norm(result))
