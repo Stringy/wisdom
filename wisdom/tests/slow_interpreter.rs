@@ -87,3 +87,22 @@ fn max(a, b) {
     run_script(&max_a, Ok(Value::Int(20)));
     run_script(&max_b, Ok(Value::Int(20)));
 }
+
+#[test]
+fn test_scope_let_bindings() {
+    let mut intp = SlowInterpreter::new();
+    let script = r#"
+let a = 20;
+fn func() {
+    let a = 1337;
+    return a;
+}
+"#;
+    intp.eval_script(script).unwrap();
+    // ensure a is expected value
+    assert_eq!(Ok(Value::Int(20)), intp.eval_script("a"));
+    // ensure func() returns expected value
+    assert_eq!(Ok(Value::Int(1337)), intp.eval_script("func()"));
+    // ensure it hasn't affected the value of a
+    assert_eq!(Ok(Value::Int(20)), intp.eval_script("a"));
+}

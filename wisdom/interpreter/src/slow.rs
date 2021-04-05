@@ -62,6 +62,15 @@ impl SlowInterpreter {
     fn visit_expr(&self, expr: &Expr) -> Result {
         use ExprKind::*;
         match &expr.kind {
+            Let(ident, rhs) => {
+                let value = if let Some(expr) = rhs {
+                    vctx!(self.visit_expr(&*expr)?)
+                } else {
+                    Value::None
+                };
+                self.globals.store_top(ident.name.clone(), value);
+                Ok(VarContext::Norm(Value::None))
+            }
             Assign(lhs, rhs) => {
                 match &lhs.kind {
                     Ident(ident) => {
@@ -103,7 +112,7 @@ impl SlowInterpreter {
             Ret(expr) => {
                 let ret = VarContext::Ret(vctx!(self.visit_expr(expr)?));
                 Ok(ret)
-            },
+            }
         }
     }
 

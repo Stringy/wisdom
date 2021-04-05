@@ -2,7 +2,7 @@ use std::fmt::{Debug, Formatter};
 use std::fmt;
 
 use common::Position;
-use tokenizer::{FromTokens, Token, TokenStream};
+use tokenizer::{FromTokens, Token, TokenStream, TokenKind};
 use tokenizer::TokenKind::*;
 
 use crate::{BinOp, Block, Ident, Value};
@@ -21,6 +21,9 @@ pub struct Expr {
 
 #[derive(Clone, Serialize, Deserialize)]
 pub enum ExprKind {
+    /// A local binding
+    /// let a = <expr>
+    Let(Ident, Option<Box<Expr>>),
     /// a = 10
     /// expr lhs to allow for future additions such as arrays
     /// i.e. foo[1] = 10;
@@ -50,6 +53,7 @@ pub enum ExprKind {
 impl Debug for ExprKind {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
+            ExprKind::Let(_, _) => write!(f, "ExprKind::Let"),
             ExprKind::Assign(_, _) => write!(f, "ExprKind::Assign"),
             ExprKind::BinOp(_, _, _) => write!(f, "ExprKind::BinOp"),
             ExprKind::Call(_, _) => write!(f, "ExprKind::Call"),
@@ -131,6 +135,17 @@ impl Expr {
                             tokens.consume();
                             let expr = Expr::parse_expr(tokens)?;
                             return Ok(Expr::new(ExprKind::Ret(expr.into()), tok.position.clone()));
+                        }
+                        "let" => {
+                            tokens.consume();
+                            let ident = expect_or_error!(tokens, Identifier)?;
+                            let expr = if let Some(_) = tokens.expect(TokenKind::Eq) {
+                                // we expect either nothing, or =
+                                Some(Box::new(Expr::parse_expr(tokens)?))
+                            } else {
+                                None
+                            };
+                            return Ok(Expr::new(ExprKind::Let((&ident).into(), expr), tok.position));
                         }
                         _ => {
                             operands.push(Expr::parse_ident(tok, tokens)?)
