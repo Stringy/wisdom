@@ -3,6 +3,8 @@ use wisdom::ast::Value;
 use wisdom::interpreter::*;
 use wisdom::interpreter::error::ErrorKind::UndefinedVar;
 
+// TODO: improve integration test rig so I can add more tests more easily.
+
 fn run_script(script: &str, expect: std::result::Result<Value, Error>) {
     let mut itp = SlowInterpreter::new();
     let result = itp.eval_script(script);
@@ -110,4 +112,64 @@ fn func() {
 #[test]
 fn test_no_let_local_assignment() {
     run_script("a = 10;", Err(Error::new(UndefinedVar("a".to_ascii_lowercase()))));
+}
+
+#[test]
+fn test_continue() {
+    let script = r#"
+let a = 0;
+let n = 0;
+while n < 10 {
+    n = n + 1;
+    continue;
+    a = a + 1;
+}
+a
+"#;
+    run_script(script, Ok(Value::Int(0)));
+}
+
+#[test]
+fn test_nested_continue() {
+    let script = r#"
+let a = 0;
+let n = 0;
+while n < 10 {
+    n = n + 1;
+    if n > 0 {
+        continue;
+    }
+    a = a + 1;
+}
+a
+"#;
+    run_script(script, Ok(Value::Int(0)));
+}
+
+#[test]
+fn test_break() {
+    let script = r#"
+let a = 0;
+while a < 10 {
+    break;
+    a = a + 1;
+}
+a
+"#;
+    run_script(script, Ok(Value::Int(0)));
+}
+
+#[test]
+fn test_nested_break() {
+    let script = r#"
+let a = 0;
+while a < 10 {
+    if a < 5 {
+        break;
+    }
+    a = a + 1;
+}
+a
+"#;
+    run_script(script, Ok(Value::Int(0)));
 }

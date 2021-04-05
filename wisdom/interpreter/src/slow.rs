@@ -6,7 +6,7 @@ use tokenizer::{FromTokens, TokenStream};
 
 use crate::{builtin, Interpreter};
 use crate::error::Error;
-use crate::error::ErrorKind::{InvalidAssignment, NotCallable, UndefinedVar, UnexpectedArgs, BreakInWrongContext};
+use crate::error::ErrorKind::{InvalidAssignment, NotCallable, UndefinedVar, UnexpectedArgs, BreakInWrongContext, ContinueInWrongContext};
 use crate::scope::Context;
 use crate::value::Operations;
 
@@ -15,6 +15,7 @@ enum VarContext<T: Clone> {
     Ret(T),
     Norm(T),
     Break,
+    Continue,
 }
 
 impl Into<VarContext<Value>> for Value {
@@ -28,7 +29,7 @@ macro_rules! vctx {
         {
             let v = $value;
             match &v {
-                VarContext::Ret(_) | VarContext::Break => return Ok(v),
+                VarContext::Ret(_) | VarContext::Break | VarContext::Continue => return Ok(v),
                 VarContext::Norm(n) => n.clone(),
             }
         }
@@ -118,8 +119,13 @@ impl SlowInterpreter {
                 let ret = VarContext::Ret(vctx!(self.visit_expr(expr)?));
                 Ok(ret)
             }
+            // TODO: add labels to break statements
             Break(_) => {
                 Ok(VarContext::Break)
+            }
+            // TODO: add labels to continue statements
+            Continue(_) => {
+                Ok(VarContext::Continue)
             }
         }
     }
@@ -141,6 +147,7 @@ impl SlowInterpreter {
             let n = self.visit_block(block)?;
             match n {
                 VarContext::Break => break,
+                VarContext::Continue => continue,
                 _ => {}
             }
         }
@@ -155,7 +162,12 @@ impl SlowInterpreter {
             result = match self.visit_stmt(stmt)? {
                 VarContext::Norm(v) => v,
                 VarContext::Break => {
+                    self.globals.pop();
                     return Ok(VarContext::Break);
+                }
+                VarContext::Continue => {
+                    self.globals.pop();
+                    return Ok(VarContext::Continue);
                 }
                 VarContext::Ret(v) => {
                     self.globals.pop();
@@ -182,6 +194,9 @@ impl SlowInterpreter {
                 VarContext::Break => {
                     // if this is handled at this level, then it's definitely wrong
                     return Err(Error::new(BreakInWrongContext));
+                }
+                VarContext::Continue => {
+                    return Err(Error::new(ContinueInWrongContext));
                 }
                 VarContext::Ret(v) => {
                     result = v;
@@ -259,6 +274,7 @@ impl Interpreter<Value, Error> for SlowInterpreter {
             result = match self.visit_stmt(&stmt)? {
                 VarContext::Norm(n) => n,
                 VarContext::Break => return Err(Error::new(BreakInWrongContext)),
+                VarContext::Continue => return Err(Error::new(ContinueInWrongContext)),
                 VarContext::Ret(n) => {
                     result = n;
                     break;

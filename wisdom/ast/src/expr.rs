@@ -50,6 +50,8 @@ pub enum ExprKind {
     Ret(Box<Expr>),
     /// A break expression, with optional label.
     Break(Option<Ident>),
+    /// A continue expression, with optional label
+    Continue(Option<Ident>),
 }
 
 impl Debug for ExprKind {
@@ -66,6 +68,7 @@ impl Debug for ExprKind {
             ExprKind::Block(_) => write!(f, "ExprKind::Block"),
             ExprKind::Ret(_) => write!(f, "ExprKind::Ret"),
             ExprKind::Break(_) => write!(f, "ExprKind::Break"),
+            ExprKind::Continue(_) => write!(f, "ExprKind::Continue")
         }
     }
 }
@@ -122,6 +125,7 @@ impl Expr {
                         "return" => return Expr::parse_return(tokens),
                         "let" => return Expr::parse_let(tokens),
                         "break" => return Expr::parse_break(tokens),
+                        "continue" => return Expr::parse_continue(tokens),
                         _ => {
                             operands.push(Expr::parse_ident(tok, tokens)?)
                         }
@@ -198,6 +202,15 @@ impl Expr {
     fn parse_break(tokens: &TokenStream) -> Result<Self, ParserError> {
         let tok = tokens.consume().expect("expected 'break' identifier token");
         Ok(Expr::new(ExprKind::Break(None), tok.position))
+    }
+
+    ///
+    /// Parse a continue expression from the token stream. Expects that the stream is
+    /// on the 'continue' identifier
+    ///
+    fn parse_continue(tokens: &TokenStream) -> Result<Self, ParserError> {
+        let tok = tokens.consume().expect("expected 'continue' identifier token");
+        Ok(Expr::new(ExprKind::Continue(None), tok.position))
     }
 
     ///
