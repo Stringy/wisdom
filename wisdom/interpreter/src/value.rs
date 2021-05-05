@@ -1,7 +1,7 @@
 use ast::Value;
 
 use crate::error::Error;
-use crate::error::ErrorKind::InvalidType;
+use crate::error::ErrorKind::{InvalidType, InvalidRegex};
 
 pub trait Operations {
     fn try_mod(&self, rhs: &Value) -> Result<Value, Error>;
@@ -17,6 +17,7 @@ pub trait Operations {
     fn try_xor(&self, rhs: &Value) -> Result<Value, Error>;
     fn try_bin_and(&self, rhs: &Value) -> Result<Value, Error>;
     fn try_bin_or(&self, rhs: &Value) -> Result<Value, Error>;
+    fn try_regex_match(&self, rhs: &Value) -> Result<Value, Error>;
     fn into_bool(&self) -> bool;
 }
 
@@ -178,6 +179,21 @@ impl Operations for Value {
             Value::Int(n) => {
                 match rhs {
                     Value::Int(m) => Ok(Value::Int(n | m)),
+                    _ => Err(Error::new(InvalidType))
+                }
+            }
+            _ => Err(Error::new(InvalidType))
+        }
+    }
+
+    fn try_regex_match(&self, rhs: &Value) -> Result<Value, Error> {
+        match self {
+            Value::String(this) => {
+                match rhs {
+                    Value::Regex(s) | Value::String(s) => {
+                        let re = regex::Regex::new(&s).map_err(|e| Error::new(InvalidRegex(e)))?;
+                        Ok(re.is_match(&this).into())
+                    },
                     _ => Err(Error::new(InvalidType))
                 }
             }

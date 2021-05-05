@@ -161,6 +161,7 @@ impl<'a> Cursor<'a> {
             '/' => Div,
 
             '=' => self.expect_equals(EqEq, Eq),
+            '~' => self.expect_equals(TildeEq, Tilde),
             '|' => self.expect_next('|', OrOr, BinOp(Or)),
             '&' => self.expect_next('&', AndAnd, BinOp(And)),
             '^' => BinOp(Xor),

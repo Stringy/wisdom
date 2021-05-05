@@ -28,6 +28,7 @@ pub enum BinOp {
     BinAnd,
     BinOr,
     Mod,
+    TildeEq,
 }
 
 impl BinOp {
@@ -41,7 +42,7 @@ impl BinOp {
             Mul | Div | Mod => 3,
             Add | Sub => 4,
             Lt | LtEq | Gt | GtEq => 6,
-            EqEq | NotEq => 7,
+            EqEq | NotEq | TildeEq => 7,
             BinAnd => 8,
             Xor => 9,
             BinOr => 10,
@@ -55,25 +56,25 @@ impl BinOp {
 impl Display for BinOp {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
-            BinOp::Add => write!(f, "+")?,
-            BinOp::Sub => write!(f, "-")?,
-            BinOp::Mul => write!(f, "*")?,
-            BinOp::Div => write!(f, "/")?,
-            BinOp::EqEq => write!(f, "==")?,
-            BinOp::NotEq => write!(f, "!=")?,
-            BinOp::LtEq => write!(f, "<=")?,
-            BinOp::GtEq => write!(f, ">=")?,
-            BinOp::Lt => write!(f, "<")?,
-            BinOp::Gt => write!(f, ">")?,
-            BinOp::And => write!(f, "&&")?,
-            BinOp::Or => write!(f, "||")?,
-            BinOp::Xor => write!(f, "^")?,
-            BinOp::BinAnd => write!(f, "&")?,
-            BinOp::BinOr => write!(f, "|")?,
-            BinOp::Eq => write!(f, "=")?,
-            BinOp::Mod => write!(f, "%")?
-        };
-        Ok(())
+            BinOp::Add => write!(f, "+"),
+            BinOp::Sub => write!(f, "-"),
+            BinOp::Mul => write!(f, "*"),
+            BinOp::Div => write!(f, "/"),
+            BinOp::EqEq => write!(f, "=="),
+            BinOp::NotEq => write!(f, "!="),
+            BinOp::LtEq => write!(f, "<="),
+            BinOp::GtEq => write!(f, ">="),
+            BinOp::Lt => write!(f, "<"),
+            BinOp::Gt => write!(f, ">"),
+            BinOp::And => write!(f, "&&"),
+            BinOp::Or => write!(f, "||"),
+            BinOp::Xor => write!(f, "^"),
+            BinOp::BinAnd => write!(f, "&"),
+            BinOp::BinOr => write!(f, "|"),
+            BinOp::Eq => write!(f, "="),
+            BinOp::Mod => write!(f, "%"),
+            BinOp::TildeEq => write!(f, "~=")
+        }
     }
 }
 
@@ -99,6 +100,7 @@ impl FromStr for BinOp {
             "&" => Self::BinAnd,
             "|" => Self::BinOr,
             "=" => Self::Eq,
+            "~=" => Self::TildeEq,
             _ => return Err(())
         })
     }

@@ -1,0 +1,8 @@
+
+fn filter(name: str, pattern: regex) {
+    return name ~= pattern
+}
+
+print(filter("foo", "foo"));
+print(filter("bar", "[0-9]+"));
+print(filter("1234", "[0-9]+"));

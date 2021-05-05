@@ -20,6 +20,7 @@ pub enum Value {
     Bool(bool),
     Func(Function),
     String(String),
+    Regex(String),
     Named(String),
     None,
 }
@@ -63,7 +64,8 @@ impl Display for Value {
             Value::String(n) => write!(f, "{}", n),
             Value::Named(n) => write!(f, "{}", n),
             Value::Func(func) => write!(f, "{}", func.ident.name),
-            Value::None => write!(f, "none")
+            Value::None => write!(f, "none"),
+            Value::Regex(s) => write!(f, "{}", s)
         }
     }
 }
