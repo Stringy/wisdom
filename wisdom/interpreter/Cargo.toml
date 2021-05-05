@@ -11,3 +11,4 @@ ast = { path = "../ast" }
 tokenizer = { path = "../tokenizer" }
 common = { path = "../common" }
 ron = "0.6.4"
+regex = "1.5.3"

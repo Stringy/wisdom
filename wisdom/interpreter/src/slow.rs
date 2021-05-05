@@ -243,6 +243,7 @@ impl SlowInterpreter {
             Xor => lhs.try_xor(&rhs)?,
             BinAnd => lhs.try_bin_and(&rhs)?,
             BinOr => lhs.try_bin_or(&rhs)?,
+            TildeEq => lhs.try_regex_match(&rhs)?,
             Eq => panic!("invalid assignment in binop")
         };
         Ok(VarContext::Norm(result))

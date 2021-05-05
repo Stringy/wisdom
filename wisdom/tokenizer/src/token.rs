@@ -46,6 +46,8 @@ pub enum TokenKind {
     OrOr,
     EqEq,
     NotEq,
+    Tilde,
+    TildeEq,
     BinOp(BinOpKind),
 }
 
@@ -88,7 +90,7 @@ impl TokenKind {
             Add | Sub | Mul | Div |
             Lt | LtEq |
             Gt | GtEq |
-            AndAnd | OrOr | EqEq | NotEq | Eq |
+            AndAnd | OrOr | EqEq | NotEq | TildeEq | Eq |
             BinOp(..) => {
                 true
             }
