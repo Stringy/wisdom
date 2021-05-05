@@ -12,3 +12,12 @@ tokenizer = { path = "tokenizer" }
 interpreter = { path = "interpreter" }
 common = { path = "common" }
 
+[dev-dependencies]
+criterion = "0.3.4"
+
+[[bench]]
+name = "interp_benchmarks"
+harness = false
+
+[profile.bench]
+debug = true
