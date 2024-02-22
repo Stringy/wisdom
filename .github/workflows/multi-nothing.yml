@@ -4,6 +4,11 @@ on:
   workflow_call:
 
 jobs:
+  nothing:
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - run: echo alwayyyyys
   skip:
     runs-on: ubuntu-latest
     if: false
