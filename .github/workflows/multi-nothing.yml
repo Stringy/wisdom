@@ -1,0 +1,11 @@
+name: Multi nothing
+
+on:
+  workflow_call:
+
+jobs:
+  skip:
+    runs-on: ubuntu-latest
+    if: false
+    steps:
+      - run: echo skip
